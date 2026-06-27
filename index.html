@@ -262,9 +262,9 @@
 <div class="container">
 
   <div class="card">
-    <label>Gemini API Key</label>
-    <input type="text" id="apiKey" placeholder="AIza..." autocomplete="off" />
-    <p class="hint">Free at <strong>aistudio.google.com</strong> — Sign in with Google → Get API Key. No payment needed.</p>
+    <label>Gemini API Key <span id="savedBadge" style="display:none;color:#5cfca0;font-size:10px;letter-spacing:0.1em;">✓ SAVED</span></label>
+    <input type="text" id="apiKey" placeholder="AIza..." autocomplete="off" oninput="saveKey()" />
+    <p class="hint">Free at <strong>aistudio.google.com</strong> — Sign in with Google → Get API Key. Saved automatically in your browser.</p>
   </div>
 
   <div class="card">
@@ -290,6 +290,22 @@
 
 <script>
 const generatedImages = [];
+
+function saveKey() {
+  const key = document.getElementById('apiKey').value.trim();
+  if (key) {
+    localStorage.setItem('gemini_key', key);
+    document.getElementById('savedBadge').style.display = 'inline';
+  }
+}
+
+window.onload = function() {
+  const saved = localStorage.getItem('gemini_key');
+  if (saved) {
+    document.getElementById('apiKey').value = saved;
+    document.getElementById('savedBadge').style.display = 'inline';
+  }
+};
 
 function parseScript(text) {
   return text.trim().split('\n').filter(l => l.trim()).map(line => {
