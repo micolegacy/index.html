@@ -329,7 +329,7 @@ async function getImagePrompt(apiKey, scene) {
       'X-Title': 'Storyboard Generator'
     },
     body: JSON.stringify({
-      model: 'meta-llama/llama-3.2-3b-instruct:free',
+      model: 'mistralai/mistral-7b-instruct:free',
       max_tokens: 200,
       messages: [{
         role: 'user',
