@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Storyboard Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --border: #1e1e2e;
+    --accent: #7c5cfc;
+    --accent2: #fc5c7c;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --success: #5cfca0;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  header {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(124,92,252,0.12);
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+
+  header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .container { padding: 20px; max-width: 700px; margin: 0 auto; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  input[type="text"], textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    resize: vertical;
+  }
+
+  input[type="text"]:focus, textarea:focus {
+    border-color: var(--accent);
+  }
+
+  input[type="text"] { font-family: 'Space Mono', monospace; font-size: 13px; }
+
+  textarea { min-height: 180px; line-height: 1.6; }
+
+  .hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  .hint code {
+    font-family: 'Space Mono', monospace;
+    background: var(--border);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 11px;
+    color: var(--accent);
+  }
+
+  button {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+
+  button:active { transform: scale(0.98); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  #status {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    padding: 10px 0;
+    font-family: 'Space Mono', monospace;
+    display: none;
+  }
+
+  #status.active { display: block; }
+
+  .progress-bar {
+    height: 2px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 8px 0 16px;
+    overflow: hidden;
+    display: none;
+  }
+
+  .progress-bar.active { display: block; }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+
+  #board { display: grid; gap: 20px; }
+
+  .scene {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .scene-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .timestamp {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    background: rgba(124,92,252,0.12);
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  .scene-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .scene-img {
+    width: 100%;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    display: block;
+    background: var(--bg);
+  }
+
+  .scene-img-placeholder {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .spinner {
+    width: 28px;
+    height: 28px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .scene-caption {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+    font-style: italic;
+  }
+
+  #error {
+    background: rgba(252,92,124,0.1);
+    border: 1px solid rgba(252,92,124,0.3);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--accent2);
+    display: none;
+    margin-bottom: 16px;
+  }
+
+  #error.active { display: block; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="logo">SB</span>
+  <h1>Storyboard Generator</h1>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <label>Gemini API Key</label>
+    <input type="text" id="apiKey" placeholder="AIza..." autocomplete="off" />
+    <p class="hint">Free at <strong>aistudio.google.com</strong> — Sign in with Google → Get API Key. No payment needed.</p>
+  </div>
+
+  <div class="card">
+    <label>Timestamped Script</label>
+    <textarea id="script" placeholder="0:00 - The camera opens on a dark city skyline at night
+0:15 - A lone figure walks under a flickering streetlight
+0:30 - Close-up on weathered hands holding a photograph
+1:00 - The figure looks up — city lights reflected in their eyes"></textarea>
+    <p class="hint">Format: <code>0:00 - Your scene description here</code> — one line per scene.</p>
+  </div>
+
+  <div id="error"></div>
+
+  <button id="generateBtn" onclick="generate()" style="display:block;width:100%;padding:14px;background:linear-gradient(135deg,#7c5cfc,#fc5c7c);border:none;border-radius:10px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:12px;">Generate Storyboard</button>
+  <button id="downloadBtn" onclick="downloadAll()" style="display:none;width:100%;padding:14px;background:linear-gradient(135deg,#1a8a5a,#5cfca0);border:none;border-radius:10px;color:#0a0a0f;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:12px;">⬇ Download All Images as ZIP</button>
+
+  <div id="status" style="display:none;font-size:13px;color:var(--muted);text-align:center;padding:10px 0;font-family:'Space Mono',monospace;"></div>
+  <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+
+  <div id="board"></div>
+
+</div>
+
+<script>
+const generatedImages = [];
+
+function parseScript(text) {
+  return text.trim().split('\n').filter(l => l.trim()).map(line => {
+    const match = line.match(/^(\d+:\d+(?::\d+)?)\s*[-\u2013\u2014]\s*(.+)$/);
+    return match ? { timestamp: match[1], description: match[2].trim() } : null;
+  }).filter(Boolean);
+}
+
+function timestampToFilename(ts) {
+  return ts.replace(/:/g, '_') + '.jpg';
+}
+
+async function getImagePrompt(apiKey, scene) {
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: `You are a cinematographer writing image generation prompts. Convert this video scene into a single vivid cinematic image prompt (max 60 words). Focus on lighting, mood, composition, color palette. No camera directions. No quotes. Just the prompt.\n\nScene: "${scene.description}"` }] }],
+        generationConfig: { maxOutputTokens: 200 }
+      })
+    }
+  );
+  if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || 'Gemini API error'); }
+  const data = await res.json();
+  return data.candidates[0].content.parts[0].text.trim();
+}
+
+function buildPollinationsUrl(prompt) {
+  const encoded = encodeURIComponent(prompt + ', cinematic, photorealistic, 4k, dramatic lighting');
+  return `https://image.pollinations.ai/prompt/${encoded}?width=800&height=450&nologo=true&seed=${Math.floor(Math.random()*99999)}`;
+}
+
+function setProgress(done, total) {
+  document.getElementById('progressFill').style.width = (total ? Math.round((done/total)*100) : 0) + '%';
+}
+
+function showError(msg) { const el = document.getElementById('error'); el.textContent = msg; el.classList.add('active'); }
+function hideError() { document.getElementById('error').classList.remove('active'); }
+
+async function generate() {
+  hideError();
+  generatedImages.length = 0;
+  document.getElementById('downloadBtn').style.display = 'none';
+
+  const apiKey = document.getElementById('apiKey').value.trim();
+  const scriptText = document.getElementById('script').value.trim();
+
+  if (!apiKey) { showError('Please enter your Gemini API key.'); return; }
+  if (!scriptText) { showError('Please enter your script.'); return; }
+
+  const scenes = parseScript(scriptText);
+  if (!scenes.length) { showError('No valid lines found. Format: 0:00 - Your scene description'); return; }
+
+  const btn = document.getElementById('generateBtn');
+  const status = document.getElementById('status');
+  const progressBar = document.getElementById('progressBar');
+  const board = document.getElementById('board');
+
+  btn.disabled = true;
+  status.style.display = 'block';
+  status.textContent = 'Starting...';
+  progressBar.classList.add('active');
+  board.innerHTML = '';
+  setProgress(0, scenes.length);
+
+  scenes.forEach((scene, i) => {
+    const el = document.createElement('div');
+    el.className = 'scene';
+    el.id = 'scene-' + i;
+    el.innerHTML = `
+      <div class="scene-header">
+        <span class="timestamp">${scene.timestamp}</span>
+        <span class="scene-title">${scene.description}</span>
+      </div>
+      <div class="scene-img-placeholder" id="placeholder-${i}"><div class="spinner"></div></div>
+      <div class="scene-caption" id="caption-${i}">Generating prompt...</div>
+    `;
+    board.appendChild(el);
+  });
+
+  let done = 0;
+  for (let i = 0; i < scenes.length; i++) {
+    const scene = scenes[i];
+    status.textContent = `Scene ${i + 1} of ${scenes.length} — ${scene.timestamp}`;
+    try {
+      const prompt = await getImagePrompt(apiKey, scene);
+      const imgUrl = buildPollinationsUrl(prompt);
+      document.getElementById('caption-' + i).textContent = prompt;
+      const img = document.createElement('img');
+      img.className = 'scene-img';
+      img.alt = scene.description;
+      img.src = imgUrl;
+      img.loading = 'lazy';
+      document.getElementById('placeholder-' + i).replaceWith(img);
+      generatedImages.push({ url: imgUrl, timestamp: scene.timestamp });
+    } catch (err) {
+      document.getElementById('placeholder-' + i).innerHTML =
+        `<span style="color:var(--accent2);font-size:12px;padding:20px;text-align:center;display:block">Failed: ${err.message}</span>`;
+      document.getElementById('caption-' + i).textContent = 'Could not generate this scene.';
+    }
+    done++;
+    setProgress(done, scenes.length);
+  }
+
+  status.textContent = `Done — ${scenes.length} scenes generated`;
+  btn.disabled = false;
+  progressBar.classList.remove('active');
+  if (generatedImages.length > 0) document.getElementById('downloadBtn').style.display = 'block';
+}
+
+async function downloadAll() {
+  const btn = document.getElementById('downloadBtn');
+  btn.disabled = true;
+  btn.textContent = 'Preparing ZIP...';
+
+  const zip = new JSZip();
+  const folder = zip.folder('storyboard');
+
+  for (const item of generatedImages) {
+    try {
+      const res = await fetch(item.url);
+      const blob = await res.blob();
+      folder.file(timestampToFilename(item.timestamp), blob);
+    } catch (e) {
+      console.warn('Could not fetch image for', item.timestamp);
+    }
+  }
+
+  const content = await zip.generateAsync({ type: 'blob' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(content);
+  a.download = 'storyboard.zip';
+  a.click();
+
+  btn.disabled = false;
+  btn.textContent = '⬇ Download All Images as ZIP';
+}
+</script>
+
+</body>
+</html>
