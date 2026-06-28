@@ -90,14 +90,19 @@ const imgs = [];
 
 function saveKey() {
   const k = document.getElementById('apiKey').value.trim();
-  if (k) { localStorage.setItem('or_key', k); document.getElementById('savedBadge').style.display = 'inline'; }
+  if (k) {
+    localStorage.setItem('or_key', k);
+    document.getElementById('savedBadge').style.display = 'inline';
+  }
 }
 
 window.onload = function() {
   const k = localStorage.getItem('or_key');
-  if (k) { document.getElementById('apiKey').value = k; document.getElementById('savedBadge').style.display = 'inline'; }
+  if (k) {
+    document.getElementById('apiKey').value = k;
+    document.getElementById('savedBadge').style.display = 'inline';
+  }
 
-  // Restore last session board
   const savedBoard = localStorage.getItem('sb_board');
   const savedImgs = localStorage.getItem('sb_imgs');
   if (savedBoard) {
@@ -110,24 +115,49 @@ window.onload = function() {
     try {
       const parsed = JSON.parse(savedImgs);
       parsed.forEach(item => { if (item && item.ts) imgs.push(item); });
-    } catch(e) {}
+    } catch (e) {}
   }
 };
 
 function parseScript(txt) {
-  return txt.trim().split('\n').filter(l => l.trim()).map(l => {
-    const m = l.match(/^(\d+:\d+(?::\d+)?)\s*[-\u2013\u2014]\s*(.+)$/);
+  return txt.trim().split('
+').filter(l => l.trim()).map(l => {
+    const m = l.match(/^(d+:d+(?::d+)?)s*[-–—]s*(.+)$/);
     return m ? { ts: m[1], desc: m[2].trim() } : null;
   }).filter(Boolean);
 }
 
 function tsToFile(ts) { return ts.replace(/:/g, '_') + '.jpg'; }
-function showErr(msg) { const e = document.getElementById('error'); e.textContent = msg; e.classList.add('show'); }
-function hideErr() { document.getElementById('error').classList.remove('show'); }
-function setProgress(d, t) { document.getElementById('progressFill').style.width = (t ? Math.round(d/t*100) : 0) + '%'; }
-function setStatus(msg) { const s = document.getElementById('status'); s.style.display = 'block'; s.textContent = msg; }
 
-// Step 1: Use OpenRouter to write a cinematic prompt
+function showErr(msg) {
+  const e = document.getElementById('error');
+  e.textContent = msg;
+  e.classList.add('show');
+}
+
+function hideErr() {
+  document.getElementById('error').classList.remove('show');
+}
+
+function setProgress(d, t) {
+  document.getElementById('progressFill').style.width = (t ? Math.round(d / t * 100) : 0) + '%';
+}
+
+function setStatus(msg) {
+  const s = document.getElementById('status');
+  s.style.display = 'block';
+  s.textContent = msg;
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 async function getCinematicPrompt(key, desc, style) {
   const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
@@ -139,25 +169,32 @@ async function getCinematicPrompt(key, desc, style) {
     },
     body: JSON.stringify({
       model: 'openrouter/auto',
-      max_tokens: 120,
-      messages: [{ role: 'user', content: 'Write a concise image generation prompt (max 40 words) for this scene. Style: ' + style + '. Output only the prompt text, nothing else.\n\nScene: ' + desc }]
+      messages: [{
+        role: 'user',
+        content: 'Write a concise image generation prompt (max 40 words) for this scene. Style: ' + style + '. Output only the prompt text, nothing else.
+
+Scene: ' + desc
+      }]
     })
   });
-  if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || 'Prompt API error'); }
+
+  if (!r.ok) {
+    const e = await r.json().catch(() => ({}));
+    throw new Error(e.error?.message || 'Prompt API error');
+  }
+
   const d = await r.json();
   const text = d.choices?.[0]?.message?.content;
   if (!text) throw new Error('Empty response from AI');
   return text.trim();
 }
 
-// Step 2: Use Pollinations to generate the image from the prompt
 function buildImgUrl(prompt, seed) {
   seed = seed || Math.floor(Math.random() * 999999);
   return 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) +
     '?model=flux&width=1280&height=720&nologo=true&seed=' + seed;
 }
 
-// Load a single image, returns img element or throws
 function loadImage(url, scene) {
   return new Promise((resolve, reject) => {
     const img = document.createElement('img');
@@ -169,16 +206,16 @@ function loadImage(url, scene) {
   });
 }
 
-// Retry with a fresh seed each attempt
 async function loadImageWithRetry(prompt, scene, i, attempt) {
   attempt = attempt || 1;
   const maxAttempts = 5;
   const seed = Math.floor(Math.random() * 999999);
   const url = buildImgUrl(prompt, seed);
+
   try {
     const img = await loadImage(url, scene);
     return { img, url };
-  } catch(e) {
+  } catch (e) {
     const phStatus = document.getElementById('ph-status-' + i);
     if (attempt < maxAttempts) {
       if (phStatus) phStatus.textContent = 'Retry ' + attempt + '/' + maxAttempts + '...';
@@ -194,12 +231,10 @@ async function processScene(key, scene, i, style) {
   const cap = document.getElementById('cap-' + i);
 
   try {
-    // Get cinematic prompt from OpenRouter
     if (phStatus) phStatus.textContent = 'Writing prompt...';
     const prompt = await getCinematicPrompt(key, scene.desc, style);
     if (cap) cap.textContent = prompt;
 
-    // Generate image via Pollinations
     if (phStatus) phStatus.textContent = 'Generating image...';
     const result = await loadImageWithRetry(prompt, scene, i, 1);
 
@@ -210,10 +245,9 @@ async function processScene(key, scene, i, style) {
     } else {
       throw new Error('Image failed after 5 attempts');
     }
-
-  } catch(err) {
+  } catch (err) {
     const ph = document.getElementById('ph-' + i);
-    if (ph) ph.innerHTML = '<span style="color:#fc5c7c;font-size:12px;padding:20px;display:block;text-align:center">Failed: ' + err.message + '</span>';
+    if (ph) ph.innerHTML = '<span style="color:#fc5c7c;font-size:12px;padding:20px;display:block;text-align:center">Failed: ' + escapeHtml(err.message) + '</span>';
     if (cap) cap.textContent = 'Could not generate.';
   }
 }
@@ -247,8 +281,8 @@ async function generate() {
     board.innerHTML += `
       <div class="scene" id="scene-${i}">
         <div class="scene-header">
-          <span class="timestamp">${s.ts}</span>
-          <span class="scene-title">${s.desc}</span>
+          <span class="timestamp">${escapeHtml(s.ts)}</span>
+          <span class="scene-title">${escapeHtml(s.desc)}</span>
         </div>
         <div class="scene-placeholder" id="ph-${i}">
           <div class="spinner"></div>
@@ -272,11 +306,10 @@ async function generate() {
   } else {
     setStatus('Done — ' + successful + ' of ' + scenes.length + ' scenes generated');
     document.getElementById('downloadBtn').classList.add('show');
-    // Save board HTML and img data to localStorage
     try {
       localStorage.setItem('sb_board', document.getElementById('board').innerHTML);
       localStorage.setItem('sb_imgs', JSON.stringify(imgs.filter(Boolean)));
-    } catch(e) {}
+    } catch (e) {}
   }
 
   btn.disabled = false;
@@ -287,20 +320,24 @@ async function downloadAll() {
   const btn = document.getElementById('downloadBtn');
   btn.disabled = true;
   btn.textContent = 'Preparing ZIP...';
+
   const zip = new JSZip();
   const folder = zip.folder('storyboard');
+
   for (let i = 0; i < imgs.length; i++) {
     if (!imgs[i]?.url) continue;
     try {
       const blob = await fetch(imgs[i].url).then(r => r.blob());
       folder.file(tsToFile(imgs[i].ts), blob);
-    } catch(e) {}
+    } catch (e) {}
   }
+
   const blob = await zip.generateAsync({ type: 'blob' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'storyboard.zip';
   a.click();
+
   btn.disabled = false;
   btn.textContent = 'Download All as ZIP';
 }
