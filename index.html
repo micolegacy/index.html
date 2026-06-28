@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -152,33 +151,41 @@ async function getCinematicPrompt(key, desc, style) {
 }
 
 // Step 2: Use Pollinations to generate the image from the prompt
-function buildImgUrl(prompt) {
-  return 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1280&height=720&nologo=true&seed=' + Math.floor(Math.random() * 999999);
+function buildImgUrl(prompt, seed) {
+  seed = seed || Math.floor(Math.random() * 999999);
+  return 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) + '?width=1280&height=720&nologo=true&seed=' + seed;
 }
 
-// Load image with retries - never give up easily
-async function loadImageWithRetry(url, scene, i, attempt) {
-  attempt = attempt || 1;
-  const maxAttempts = 5;
-  return new Promise((resolve) => {
+// Load a single image, returns img element or throws
+function loadImage(url, scene) {
+  return new Promise((resolve, reject) => {
     const img = document.createElement('img');
     img.className = 'scene-img';
     img.alt = scene.desc;
-    const phStatus = document.getElementById('ph-status-' + i);
-    img.onload = () => resolve({ img, url });
-    img.onerror = async () => {
-      if (attempt < maxAttempts) {
-        if (phStatus) phStatus.textContent = 'Retry ' + attempt + '/' + maxAttempts + '...';
-        await new Promise(r => setTimeout(r, 2000 * attempt));
-        // Use a new seed on retry
-        const newUrl = buildImgUrl(url.split('?')[0].split('/prompt/')[1] ? decodeURIComponent(url.split('/prompt/')[1].split('?')[0]) : '');
-        resolve(await loadImageWithRetry(newUrl || url, scene, i, attempt + 1));
-      } else {
-        resolve(null);
-      }
-    };
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('Image load failed'));
     img.src = url;
   });
+}
+
+// Retry with a fresh seed each attempt
+async function loadImageWithRetry(prompt, scene, i, attempt) {
+  attempt = attempt || 1;
+  const maxAttempts = 5;
+  const seed = Math.floor(Math.random() * 999999);
+  const url = buildImgUrl(prompt, seed);
+  try {
+    const img = await loadImage(url, scene);
+    return { img, url };
+  } catch(e) {
+    const phStatus = document.getElementById('ph-status-' + i);
+    if (attempt < maxAttempts) {
+      if (phStatus) phStatus.textContent = 'Retry ' + attempt + '/' + maxAttempts + '...';
+      await new Promise(r => setTimeout(r, 2000 * attempt));
+      return loadImageWithRetry(prompt, scene, i, attempt + 1);
+    }
+    return null;
+  }
 }
 
 async function processScene(key, scene, i, style) {
@@ -193,8 +200,7 @@ async function processScene(key, scene, i, style) {
 
     // Generate image via Pollinations
     if (phStatus) phStatus.textContent = 'Generating image...';
-    const url = buildImgUrl(prompt);
-    const result = await loadImageWithRetry(url, scene, i, 1);
+    const result = await loadImageWithRetry(prompt, scene, i, 1);
 
     if (result) {
       const ph = document.getElementById('ph-' + i);
@@ -300,6 +306,7 @@ async function downloadAll() {
 </script>
 </body>
 </html>
+
 
 
 
