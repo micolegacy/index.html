@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -126,7 +127,8 @@ async function getPrompt(key, desc) {
 }
 
 function imgUrl(prompt) {
-  return 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt + ', cinematic, 4k, dramatic lighting') + '?width=800&height=450&nologo=true&seed=' + Math.floor(Math.random()*99999);
+  const basePrompt = encodeURIComponent(prompt + ', cinematic, 4k, dramatic lighting, high quality');
+  return 'https://image.pollinations.ai/prompt/' + basePrompt + '?width=1280&height=720&nologo=true';
 }
 
 function showErr(msg) { const e = document.getElementById('error'); e.textContent = msg; e.classList.add('show'); }
@@ -171,9 +173,9 @@ async function generate() {
       </div>`;
   });
 
-  for (let i = 0; i < scenes.length; i++) {
-    const s = scenes[i];
-    status.textContent = 'Scene ' + (i+1) + ' of ' + scenes.length + ' — ' + s.ts;
+  let completed = 0;
+
+  await Promise.all(scenes.map(async (s, i) => {
     try {
       const prompt = await getPrompt(key, s.desc);
       const url = imgUrl(prompt);
@@ -189,8 +191,10 @@ async function generate() {
       document.getElementById('ph-' + i).innerHTML = '<span style="color:#fc5c7c;font-size:12px;padding:20px;display:block;text-align:center">Failed: ' + err.message + '</span>';
       document.getElementById('cap-' + i).textContent = 'Could not generate this scene.';
     }
-    setProgress(i+1, scenes.length);
-  }
+    completed++;
+    setProgress(completed, scenes.length);
+    status.textContent = completed + ' of ' + scenes.length + ' scenes done...';
+  }));
 
   status.textContent = 'Done — ' + scenes.length + ' scenes generated';
   btn.disabled = false;
