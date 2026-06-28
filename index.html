@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Storyboard Generator</title>
+<title>Storyboard Generator Debug</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root { --bg: #0a0a0f; --surface: #13131a; --border: #1e1e2e; --accent: #7c5cfc; --accent2: #fc5c7c; --text: #e8e8f0; --muted: #6b6b80; }
+  :root { --bg: #0a0a0f; --surface: #13131a; --border: #1e1e2e; --accent: #7c5cfc; --text: #e8e8f0; --muted: #6b6b80; }
   body { background: var(--bg); color: var(--text); font-family: 'Space Grotesk', sans-serif; min-height: 100vh; }
   header { padding: 24px 20px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
   .logo { font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); background: rgba(124,92,252,0.12); padding: 4px 10px; border-radius: 4px; }
@@ -16,28 +16,21 @@
   .container { padding: 20px; max-width: 700px; margin: 0 auto; }
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
   label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-  input[type="text"], textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Space Grotesk', sans-serif; font-size: 14px; padding: 12px 14px; outline: none; transition: border-color 0.2s; resize: vertical; }
+  input[type="text"], textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Space Grotesk', sans-serif; font-size: 14px; padding: 12px 14px; outline: none; resize: vertical; }
   input[type="text"]:focus, textarea:focus { border-color: var(--accent); }
   input[type="text"] { font-family: 'Space Mono', monospace; font-size: 13px; }
   textarea { min-height: 160px; line-height: 1.6; }
   .hint { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
-  .hint code { font-family: 'Space Mono', monospace; background: var(--border); padding: 1px 5px; border-radius: 3px; font-size: 11px; color: var(--accent); }
-  .saved-badge { display: none; color: #5cfca0; font-size: 10px; letter-spacing: 0.1em; margin-left: 6px; }
-  .btn { display: block; width: 100%; padding: 14px; border: none; border-radius: 10px; font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; letter-spacing: 0.04em; margin-bottom: 12px; transition: transform 0.1s, opacity 0.2s; }
-  .btn:active { transform: scale(0.98); }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn { display: block; width: 100%; padding: 14px; border: none; border-radius: 10px; font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; letter-spacing: 0.04em; margin-bottom: 12px; }
   .btn-primary { background: linear-gradient(135deg, #7c5cfc, #fc5c7c); color: #fff; }
   .btn-download { background: linear-gradient(135deg, #1a8a5a, #5cfca0); color: #0a0a0f; display: none; }
   .btn-download.show { display: block; }
-  #status { display: none; font-size: 13px; color: var(--muted); text-align: center; padding: 10px 0; font-family: 'Space Mono', monospace; white-space: pre-wrap; }
-  .progress-bar { height: 2px; background: var(--border); border-radius: 2px; margin: 4px 0 16px; overflow: hidden; display: none; }
-  .progress-bar.show { display: block; }
-  .progress-fill { height: 100%; background: linear-gradient(90deg, #7c5cfc, #fc5c7c); width: 0%; transition: width 0.3s ease; }
-  #error { background: rgba(252,92,124,0.1); border: 1px solid rgba(252,92,124,0.3); border-radius: 10px; padding: 14px 16px; font-size: 13px; color: #fc5c7c; display: none; margin-bottom: 16px; white-space: pre-wrap; }
-  #error.show { display: block; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  #error, #debug { border-radius: 10px; padding: 14px 16px; font-size: 13px; white-space: pre-wrap; display: none; margin-bottom: 16px; }
+  #error { background: rgba(252,92,124,0.1); border: 1px solid rgba(252,92,124,0.3); color: #fc5c7c; }
+  #debug { background: rgba(124,92,252,0.08); border: 1px solid rgba(124,92,252,0.25); color: #d7d2ff; max-height: 240px; overflow: auto; font-family: 'Space Mono', monospace; font-size: 12px; }
   #board { display: grid; gap: 20px; }
-  .scene { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; animation: fadeUp 0.4s ease both; }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .scene { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
   .scene-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
   .timestamp { font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; color: var(--accent); background: rgba(124,92,252,0.12); padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
   .scene-title { font-size: 14px; font-weight: 600; flex: 1; }
@@ -50,104 +43,74 @@
 </style>
 </head>
 <body>
-
 <header>
   <span class="logo">SB</span>
   <h1>Storyboard Generator</h1>
 </header>
 
 <div class="container">
-
   <div class="card">
-    <label>OpenRouter API Key <span class="saved-badge" id="savedBadge">✓ SAVED</span></label>
+    <label>OpenRouter API Key</label>
     <input type="text" id="apiKey" placeholder="sk-or-..." autocomplete="off" oninput="saveKey()" />
-    <p class="hint">Free at <strong>openrouter.ai</strong> — Sign up → Keys → Create Key. No payment needed to start.</p>
+    <p class="hint">Enter your OpenRouter key here.</p>
   </div>
 
   <div class="card">
-    <label>Visual Style (optional)</label>
-    <input type="text" id="style" value="cinematic 16:9, photorealistic, dramatic lighting, 8k, film grain, shallow depth of field" />
-    <p class="hint">Added to every image for consistency. Describe your character or visual theme here.</p>
+    <label>Visual Style</label>
+    <input type="text" id="style" value="cinematic, photorealistic, dramatic lighting, film grain" />
   </div>
 
   <div class="card">
     <label>Timestamped Script</label>
-    <textarea id="script" placeholder="0:00 - Dark city skyline at night&#10;0:15 - A lone figure under a flickering streetlight&#10;0:30 - Close-up of hands holding a photograph&#10;1:00 - The figure looks up, city lights in their eyes"></textarea>
-    <p class="hint">Format: <code>0:00 - Your scene description</code> — one line per scene.</p>
+    <textarea id="script" placeholder="0:00 - Dark city skyline at night
+0:15 - A lone figure under a streetlight"></textarea>
   </div>
 
   <div id="error"></div>
+  <div id="debug"></div>
   <button class="btn btn-primary" id="generateBtn" onclick="generate()">Generate Storyboard</button>
   <button class="btn btn-download" id="downloadBtn" onclick="downloadAll()">Download All as ZIP</button>
-  <div id="status"></div>
-  <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
   <div id="board"></div>
-
 </div>
 
 <script>
 const imgs = [];
 
-function saveKey() {
-  const k = document.getElementById('apiKey').value.trim();
-  if (k) {
-    localStorage.setItem('or_key', k);
-    document.getElementById('savedBadge').style.display = 'inline';
-  }
+function log(msg) {
+  const d = document.getElementById('debug');
+  d.style.display = 'block';
+  d.textContent += (d.textContent ? '
+' : '') + msg;
+  d.scrollTop = d.scrollHeight;
 }
-
-window.onload = function() {
-  const k = localStorage.getItem('or_key');
-  if (k) {
-    document.getElementById('apiKey').value = k;
-    document.getElementById('savedBadge').style.display = 'inline';
-  }
-
-  const savedBoard = localStorage.getItem('sb_board');
-  const savedImgs = localStorage.getItem('sb_imgs');
-  if (savedBoard) {
-    document.getElementById('board').innerHTML = savedBoard;
-    document.getElementById('downloadBtn').classList.add('show');
-    setStatus('Last session restored. Generate again to refresh.');
-    document.getElementById('status').style.display = 'block';
-  }
-
-  if (savedImgs) {
-    try {
-      const parsed = JSON.parse(savedImgs);
-      parsed.forEach(item => { if (item && item.ts) imgs.push(item); });
-    } catch (e) {}
-  }
-};
-
-function parseScript(txt) {
-  return txt.trim().split('
-').filter(l => l.trim()).map(l => {
-    const m = l.match(/^(d+:d+(?::d+)?)s*[-–—]s*(.+)$/);
-    return m ? { ts: m[1], desc: m[2].trim() } : null;
-  }).filter(Boolean);
-}
-
-function tsToFile(ts) { return ts.replace(/:/g, '_') + '.jpg'; }
 
 function showErr(msg) {
   const e = document.getElementById('error');
   e.textContent = msg;
-  e.classList.add('show');
+  e.style.display = 'block';
 }
 
 function hideErr() {
-  document.getElementById('error').classList.remove('show');
+  document.getElementById('error').style.display = 'none';
+  document.getElementById('error').textContent = '';
 }
 
-function setProgress(d, t) {
-  document.getElementById('progressFill').style.width = (t ? Math.round(d / t * 100) : 0) + '%';
+function saveKey() {
+  const k = document.getElementById('apiKey').value.trim();
+  if (k) localStorage.setItem('or_key', k);
 }
 
-function setStatus(msg) {
-  const s = document.getElementById('status');
-  s.style.display = 'block';
-  s.textContent = msg;
+window.onload = function() {
+  const k = localStorage.getItem('or_key');
+  if (k) document.getElementById('apiKey').value = k;
+};
+
+function parseScript(txt) {
+  return txt.trim().split('
+').filter(Boolean).map(l => {
+    const m = l.match(/^(d+:d+(?::d+)?)s*[-–—]s*(.+)$/);
+    return m ? { ts: m[1], desc: m[2].trim() } : null;
+  }).filter(Boolean);
 }
 
 function escapeHtml(str) {
@@ -159,141 +122,115 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
-async function getCinematicPrompt(key, desc, style) {
-  const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + key,
-      'HTTP-Referer': 'https://micolegacy.github.io',
-      'X-Title': 'Storyboard Generator'
-    },
-    body: JSON.stringify({
-      model: 'openrouter/auto',
-      messages: [{
-        role: 'user',
-        content: 'Write a concise image generation prompt (max 40 words) for this scene. Style: ' + style + '. Output only the prompt text, nothing else.
-
-Scene: ' + desc
-      }]
-    })
-  });
-
-  const raw = await r.text();
-  let data;
+async function fetchJsonWithDebug(url, options, label) {
+  log(label + ' -> request started');
+  let r;
   try {
-    data = JSON.parse(raw);
+    r = await fetch(url, options);
   } catch (e) {
-    throw new Error('OpenRouter returned non-JSON response:
-' + raw.slice(0, 400));
+    throw new Error(label + ' network error:
+' + e.message);
   }
-
+  const raw = await r.text();
+  log(label + ' -> HTTP ' + r.status + ' ' + r.statusText);
+  log(label + ' -> response:
+' + raw.slice(0, 1000));
+  let data = null;
+  try { data = raw ? JSON.parse(raw) : null; } catch (e) {}
   if (!r.ok) {
-    const msg = data?.error?.message || data?.message || raw || 'Prompt API error';
-    throw new Error('OpenRouter error ' + r.status + ':
+    const msg = data?.error?.message || data?.message || raw || 'Unknown error';
+    throw new Error(label + ' HTTP ' + r.status + ':
 ' + msg);
   }
+  if (!data) throw new Error(label + ' returned non-JSON response');
+  return data;
+}
 
-  const text = data.choices?.[0]?.message?.content;
-  if (!text) throw new Error('Empty response from AI');
-  return text.trim();
+async function getCinematicPrompt(key, desc, style) {
+  return fetchJsonWithDebug(
+    'https://openrouter.ai/api/v1/chat/completions',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + key,
+        'HTTP-Referer': location.origin,
+        'X-Title': 'Storyboard Generator'
+      },
+      body: JSON.stringify({
+        model: 'openrouter/auto',
+        messages: [{
+          role: 'user',
+          content: 'Write a concise image generation prompt (max 40 words) for this scene. Style: ' + style + '. Output only the prompt text.
+
+Scene: ' + desc
+        }]
+      })
+    },
+    'OpenRouter prompt'
+  ).then(d => {
+    const text = d.choices?.[0]?.message?.content;
+    if (!text) throw new Error('OpenRouter prompt response had no text');
+    return text.trim();
+  });
 }
 
 function buildImgUrl(prompt, seed) {
-  seed = seed || Math.floor(Math.random() * 999999);
   return 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) +
     '?model=flux&width=1280&height=720&nologo=true&seed=' + seed;
 }
 
-function loadImage(url, scene) {
+function loadImage(url) {
   return new Promise((resolve, reject) => {
-    const img = document.createElement('img');
-    img.className = 'scene-img';
-    img.alt = scene.desc;
+    const img = new Image();
     img.onload = () => resolve(img);
     img.onerror = () => reject(new Error('Image load failed'));
     img.src = url;
   });
 }
 
-async function loadImageWithRetry(prompt, scene, i, attempt) {
-  attempt = attempt || 1;
-  const maxAttempts = 5;
-  const seed = Math.floor(Math.random() * 999999);
-  const url = buildImgUrl(prompt, seed);
-
-  try {
-    const img = await loadImage(url, scene);
-    return { img, url };
-  } catch (e) {
-    const phStatus = document.getElementById('ph-status-' + i);
-    if (attempt < maxAttempts) {
-      if (phStatus) phStatus.textContent = 'Retry ' + attempt + '/' + maxAttempts + '...
-' + e.message;
-      await new Promise(r => setTimeout(r, 2000 * attempt));
-      return loadImageWithRetry(prompt, scene, i, attempt + 1);
-    }
-    if (phStatus) phStatus.textContent = 'Image failed after ' + maxAttempts + ' attempts.
-' + e.message;
-    return null;
-  }
-}
-
 async function processScene(key, scene, i, style) {
   const phStatus = document.getElementById('ph-status-' + i);
   const cap = document.getElementById('cap-' + i);
-
   try {
-    if (phStatus) phStatus.textContent = 'Writing prompt...';
+    phStatus.textContent = 'Writing prompt...';
     const prompt = await getCinematicPrompt(key, scene.desc, style);
-    if (cap) cap.textContent = prompt;
-
-    if (phStatus) phStatus.textContent = 'Generating image...';
-    const result = await loadImageWithRetry(prompt, scene, i, 1);
-
-    if (result) {
-      const ph = document.getElementById('ph-' + i);
-      if (ph) ph.replaceWith(result.img);
-      imgs[i] = { url: result.url, ts: scene.ts };
-    } else {
-      throw new Error('Image failed after 5 attempts');
-    }
-  } catch (err) {
+    cap.textContent = prompt;
+    phStatus.textContent = 'Generating image...';
+    const url = buildImgUrl(prompt, Math.floor(Math.random() * 999999));
+    log('Pollinations -> ' + url);
+    const img = await loadImage(url);
+    img.className = 'scene-img';
     const ph = document.getElementById('ph-' + i);
-    const msg = escapeHtml(err.message || 'Unknown error');
-    if (ph) {
-      ph.innerHTML = '<span style="color:#fc5c7c;font-size:12px;padding:20px;display:block;text-align:left;white-space:pre-wrap">Failed:
-' + msg + '</span>';
-    }
-    if (cap) cap.textContent = 'Could not generate.';
+    ph.replaceWith(img);
+    imgs[i] = { url, ts: scene.ts };
+  } catch (err) {
+    phStatus.textContent = 'FAILED
+' + err.message;
+    cap.textContent = 'Could not generate.';
     throw err;
   }
 }
 
 async function generate() {
   hideErr();
-  imgs.length = 0;
-  document.getElementById('downloadBtn').classList.remove('show');
-
+  document.getElementById('debug').textContent = '';
   const key = document.getElementById('apiKey').value.trim();
   const txt = document.getElementById('script').value.trim();
-  const style = document.getElementById('style').value.trim() || 'cinematic, photorealistic, dramatic lighting';
-
-  if (!key) { showErr('Please enter your OpenRouter API key.'); return; }
-  if (!txt) { showErr('Please enter your script.'); return; }
+  const style = document.getElementById('style').value.trim() || 'cinematic, photorealistic';
+  if (!key) return showErr('Please enter your OpenRouter API key.');
+  if (!txt) return showErr('Please enter your script.');
 
   const scenes = parseScript(txt);
-  if (!scenes.length) { showErr('No valid lines found. Format: 0:00 - Your scene description'); return; }
+  if (!scenes.length) return showErr('No valid lines found. Use: 0:00 - Scene description');
 
   const btn = document.getElementById('generateBtn');
-  const bar = document.getElementById('progressBar');
   const board = document.getElementById('board');
-
+  const downloadBtn = document.getElementById('downloadBtn');
   btn.disabled = true;
-  bar.classList.add('show');
+  downloadBtn.classList.remove('show');
   board.innerHTML = '';
-  setProgress(0, scenes.length);
-  setStatus('Starting ' + scenes.length + ' scenes...');
+  imgs.length = 0;
 
   scenes.forEach((s, i) => {
     board.innerHTML += `
@@ -310,63 +247,30 @@ async function generate() {
       </div>`;
   });
 
-  let completed = 0;
-  const results = await Promise.allSettled(scenes.map(async (s, i) => {
-    try {
-      await processScene(key, s, i, style);
-    } finally {
-      completed++;
-      setProgress(completed, scenes.length);
-      setStatus(completed + ' of ' + scenes.length + ' scenes done...');
-    }
-  }));
+  const results = await Promise.allSettled(scenes.map((s, i) => processScene(key, s, i, style)));
+  const failed = results.filter(r => r.status === 'rejected').length;
+  const ok = results.length - failed;
 
-  const failed = results.filter(r => r.status === 'rejected');
-  const successful = imgs.filter(Boolean).length;
-
-  if (successful === 0) {
-    setStatus('All scenes failed. Check the error messages above.');
-  } else {
-    setStatus('Done — ' + successful + ' of ' + scenes.length + ' scenes generated');
-    document.getElementById('downloadBtn').classList.add('show');
-    try {
-      localStorage.setItem('sb_board', document.getElementById('board').innerHTML);
-      localStorage.setItem('sb_imgs', JSON.stringify(imgs.filter(Boolean)));
-    } catch (e) {}
-  }
-
-  if (failed.length) {
-    showErr('Some scenes failed. Scroll to the failed cards and read the on-screen error message.');
-  }
+  if (ok > 0) downloadBtn.classList.add('show');
+  if (failed > 0) showErr(failed + ' scene(s) failed. Read the debug box above for the exact reason.');
+  if (ok === 0) showErr('Nothing generated. See debug box above.');
 
   btn.disabled = false;
-  bar.classList.remove('show');
 }
 
 async function downloadAll() {
-  const btn = document.getElementById('downloadBtn');
-  btn.disabled = true;
-  btn.textContent = 'Preparing ZIP...';
-
   const zip = new JSZip();
   const folder = zip.folder('storyboard');
-
   for (let i = 0; i < imgs.length; i++) {
     if (!imgs[i]?.url) continue;
-    try {
-      const blob = await fetch(imgs[i].url).then(r => r.blob());
-      folder.file(tsToFile(imgs[i].ts), blob);
-    } catch (e) {}
+    const blob = await fetch(imgs[i].url).then(r => r.blob());
+    folder.file(imgs[i].ts.replace(/:/g, '_') + '.jpg', blob);
   }
-
   const blob = await zip.generateAsync({ type: 'blob' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'storyboard.zip';
   a.click();
-
-  btn.disabled = false;
-  btn.textContent = 'Download All as ZIP';
 }
 </script>
 </body>
