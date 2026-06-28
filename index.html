@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,19 +22,20 @@
   input[type="text"], textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Space Grotesk', sans-serif; font-size: 14px; padding: 12px 14px; outline: none; transition: border-color 0.2s; resize: vertical; }
   input[type="text"]:focus, textarea:focus { border-color: var(--accent); }
   input[type="text"] { font-family: 'Space Mono', monospace; font-size: 13px; }
-  textarea { min-height: 180px; line-height: 1.6; }
+  textarea { min-height: 160px; line-height: 1.6; }
   .hint { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
   .hint code { font-family: 'Space Mono', monospace; background: var(--border); padding: 1px 5px; border-radius: 3px; font-size: 11px; color: var(--accent); }
-  .btn { display: block; width: 100%; padding: 14px; border: none; border-radius: 10px; color: #fff; font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; letter-spacing: 0.04em; margin-bottom: 12px; transition: transform 0.1s; }
+  .saved-badge { display: none; color: #5cfca0; font-size: 10px; letter-spacing: 0.1em; margin-left: 6px; }
+  .btn { display: block; width: 100%; padding: 14px; border: none; border-radius: 10px; font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; letter-spacing: 0.04em; margin-bottom: 12px; transition: transform 0.1s, opacity 0.2s; }
   .btn:active { transform: scale(0.98); }
   .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .btn-primary { background: linear-gradient(135deg, #7c5cfc, #fc5c7c); }
+  .btn-primary { background: linear-gradient(135deg, #7c5cfc, #fc5c7c); color: #fff; }
   .btn-download { background: linear-gradient(135deg, #1a8a5a, #5cfca0); color: #0a0a0f; display: none; }
   .btn-download.show { display: block; }
   #status { display: none; font-size: 13px; color: var(--muted); text-align: center; padding: 10px 0; font-family: 'Space Mono', monospace; }
-  .progress-bar { height: 2px; background: var(--border); border-radius: 2px; margin: 8px 0 16px; overflow: hidden; display: none; }
+  .progress-bar { height: 2px; background: var(--border); border-radius: 2px; margin: 4px 0 16px; overflow: hidden; display: none; }
   .progress-bar.show { display: block; }
-  .progress-fill { height: 100%; background: linear-gradient(90deg, #7c5cfc, #fc5c7c); width: 0%; transition: width 0.4s ease; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #7c5cfc, #fc5c7c); width: 0%; transition: width 0.3s ease; }
   #error { background: rgba(252,92,124,0.1); border: 1px solid rgba(252,92,124,0.3); border-radius: 10px; padding: 14px 16px; font-size: 13px; color: #fc5c7c; display: none; margin-bottom: 16px; }
   #error.show { display: block; }
   #board { display: grid; gap: 20px; }
@@ -45,11 +45,12 @@
   .timestamp { font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; color: var(--accent); background: rgba(124,92,252,0.12); padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
   .scene-title { font-size: 14px; font-weight: 600; flex: 1; }
   .scene-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
-  .scene-placeholder { width: 100%; aspect-ratio: 16/9; background: var(--bg); display: flex; align-items: center; justify-content: center; }
+  .scene-placeholder { width: 100%; aspect-ratio: 16/9; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
   .spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  .ph-status { font-size: 11px; color: var(--muted); font-family: 'Space Mono', monospace; }
   .scene-caption { padding: 12px 16px; font-size: 12px; color: var(--muted); line-height: 1.5; font-style: italic; }
-  .saved-badge { display: none; color: #5cfca0; font-size: 10px; letter-spacing: 0.1em; margin-left: 6px; }
+  .retry-badge { color: #fc5c7c; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -64,7 +65,13 @@
   <div class="card">
     <label>OpenRouter API Key <span class="saved-badge" id="savedBadge">✓ SAVED</span></label>
     <input type="text" id="apiKey" placeholder="sk-or-..." autocomplete="off" oninput="saveKey()" />
-    <p class="hint">Free at <strong>openrouter.ai</strong> — Sign up free → Keys → Create Key. Saved automatically in your browser.</p>
+    <p class="hint">Free at <strong>openrouter.ai</strong> — Sign up → Keys → Create Key. Includes $1 free credit (~300 images).</p>
+  </div>
+
+  <div class="card">
+    <label>Visual Style (optional)</label>
+    <input type="text" id="style" value="cinematic 16:9, photorealistic, dramatic lighting, 8k, film grain, shallow depth of field" />
+    <p class="hint">This style is added to every image prompt for consistency.</p>
   </div>
 
   <div class="card">
@@ -74,10 +81,8 @@
   </div>
 
   <div id="error"></div>
-
   <button class="btn btn-primary" id="generateBtn" onclick="generate()">Generate Storyboard</button>
   <button class="btn btn-download" id="downloadBtn" onclick="downloadAll()">Download All as ZIP</button>
-
   <div id="status"></div>
   <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
   <div id="board"></div>
@@ -105,8 +110,12 @@ function parseScript(txt) {
 }
 
 function tsToFile(ts) { return ts.replace(/:/g, '_') + '.jpg'; }
+function showErr(msg) { const e = document.getElementById('error'); e.textContent = msg; e.classList.add('show'); }
+function hideErr() { document.getElementById('error').classList.remove('show'); }
+function setProgress(d, t) { document.getElementById('progressFill').style.width = (t ? Math.round(d/t*100) : 0) + '%'; }
+function setStatus(msg) { const s = document.getElementById('status'); s.style.display = 'block'; s.textContent = msg; }
 
-async function getPrompt(key, desc) {
+async function getCinematicPrompt(key, desc, style) {
   const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -117,24 +126,94 @@ async function getPrompt(key, desc) {
     },
     body: JSON.stringify({
       model: 'openrouter/auto',
-      max_tokens: 150,
-      messages: [{ role: 'user', content: 'Write a short cinematic image generation prompt (max 50 words) for this scene. Only output the prompt, nothing else.\n\nScene: ' + desc }]
+      max_tokens: 120,
+      messages: [{ role: 'user', content: 'Write a concise image generation prompt (max 40 words) for this scene. Output only the prompt text, nothing else.\n\nScene: ' + desc }]
     })
   });
-  if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || 'API error'); }
+  if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || 'Prompt API error'); }
   const d = await r.json();
-  return d.choices[0].message.content.trim();
+  return d.choices[0].message.content.trim() + ', ' + style;
 }
 
-function imgUrl(prompt) {
-  const seed = Math.floor(Math.random()*99999);
-  const basePrompt = encodeURIComponent(prompt + ', cinematic, 4k, dramatic lighting');
-  return 'https://image.pollinations.ai/prompt/' + basePrompt + '?width=800&height=450&nologo=true&seed=' + seed;
+async function generateImage(key, prompt, attempt) {
+  attempt = attempt || 1;
+  const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + key,
+      'HTTP-Referer': 'https://micolegacy.github.io',
+      'X-Title': 'Storyboard Generator'
+    },
+    body: JSON.stringify({
+      model: 'black-forest-labs/flux-schnell',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 1
+    })
+  });
+  if (!r.ok) {
+    const e = await r.json();
+    throw new Error(e.error?.message || 'Image API error');
+  }
+  const d = await r.json();
+  // Flux returns image URL in the response
+  const content = d.choices?.[0]?.message?.content || '';
+  // Try to extract URL from response
+  const urlMatch = content.match(/https?:\/\/[^\s"')]+\.(jpg|jpeg|png|webp)/i);
+  if (urlMatch) return urlMatch[0];
+  // Some models return it differently
+  if (d.choices?.[0]?.message?.image_url) return d.choices[0].message.image_url;
+  throw new Error('No image URL in response');
 }
 
-function showErr(msg) { const e = document.getElementById('error'); e.textContent = msg; e.classList.add('show'); }
-function hideErr() { document.getElementById('error').classList.remove('show'); }
-function setProgress(d, t) { document.getElementById('progressFill').style.width = (t ? Math.round(d/t*100) : 0) + '%'; }
+async function processScene(key, scene, i, style, totalDone, total) {
+  const phStatus = document.getElementById('ph-status-' + i);
+  const cap = document.getElementById('cap-' + i);
+
+  try {
+    // Step 1: Get cinematic prompt
+    if (phStatus) phStatus.textContent = 'Writing prompt...';
+    const prompt = await getCinematicPrompt(key, scene.desc, style);
+    if (cap) cap.textContent = prompt;
+
+    // Step 2: Generate image with Flux, retry up to 4 times
+    let imgUrl = null;
+    let lastErr = null;
+    for (let attempt = 1; attempt <= 4; attempt++) {
+      try {
+        if (phStatus) phStatus.textContent = attempt > 1 ? 'Retry ' + attempt + '/4...' : 'Generating image...';
+        imgUrl = await generateImage(key, prompt, attempt);
+        break;
+      } catch(e) {
+        lastErr = e;
+        if (attempt < 4) await new Promise(r => setTimeout(r, 1500 * attempt));
+      }
+    }
+
+    if (!imgUrl) throw lastErr || new Error('Failed after 4 attempts');
+
+    // Step 3: Load image into DOM
+    if (phStatus) phStatus.textContent = 'Loading...';
+    await new Promise((resolve, reject) => {
+      const img = document.createElement('img');
+      img.className = 'scene-img';
+      img.alt = scene.desc;
+      img.onload = () => {
+        const ph = document.getElementById('ph-' + i);
+        if (ph) ph.replaceWith(img);
+        imgs[i] = { url: imgUrl, ts: scene.ts };
+        resolve();
+      };
+      img.onerror = () => reject(new Error('Image load failed'));
+      img.src = imgUrl;
+    });
+
+  } catch(err) {
+    const ph = document.getElementById('ph-' + i);
+    if (ph) ph.innerHTML = '<span style="color:#fc5c7c;font-size:12px;padding:20px;display:block;text-align:center">Failed: ' + err.message + '</span>';
+    if (cap) cap.textContent = 'Could not generate.';
+  }
+}
 
 async function generate() {
   hideErr();
@@ -143,6 +222,7 @@ async function generate() {
 
   const key = document.getElementById('apiKey').value.trim();
   const txt = document.getElementById('script').value.trim();
+  const style = document.getElementById('style').value.trim() || 'cinematic, photorealistic, dramatic lighting';
 
   if (!key) { showErr('Please enter your OpenRouter API key.'); return; }
   if (!txt) { showErr('Please enter your script.'); return; }
@@ -151,17 +231,16 @@ async function generate() {
   if (!scenes.length) { showErr('No valid lines found. Format: 0:00 - Your scene description'); return; }
 
   const btn = document.getElementById('generateBtn');
-  const status = document.getElementById('status');
   const bar = document.getElementById('progressBar');
   const board = document.getElementById('board');
 
   btn.disabled = true;
-  status.style.display = 'block';
-  status.textContent = 'Starting...';
   bar.classList.add('show');
   board.innerHTML = '';
   setProgress(0, scenes.length);
+  setStatus('Starting ' + scenes.length + ' scenes...');
 
+  // Render all placeholders first
   scenes.forEach((s, i) => {
     board.innerHTML += `
       <div class="scene" id="scene-${i}">
@@ -169,94 +248,58 @@ async function generate() {
           <span class="timestamp">${s.ts}</span>
           <span class="scene-title">${s.desc}</span>
         </div>
-        <div class="scene-placeholder" id="ph-${i}"><div class="spinner"></div></div>
-        <div class="scene-caption" id="cap-${i}">Generating...</div>
+        <div class="scene-placeholder" id="ph-${i}">
+          <div class="spinner"></div>
+          <span class="ph-status" id="ph-status-${i}">Waiting...</span>
+        </div>
+        <div class="scene-caption" id="cap-${i}">Generating prompt...</div>
       </div>`;
   });
 
+  // Process all scenes in parallel
   let completed = 0;
-
-  // Step 1: Generate all prompts in parallel (fast)
-  status.textContent = 'Generating all prompts...';
-  const prompts = await Promise.all(scenes.map(async (s, i) => {
-    try {
-      const prompt = await getPrompt(key, s.desc);
-      document.getElementById('cap-' + i).textContent = prompt;
-      return { prompt, i, s };
-    } catch(err) {
-      document.getElementById('cap-' + i).textContent = 'Prompt failed.';
-      return null;
-    }
-  }));
-
-  // Step 2: Load images one by one with retries - never drop an image
-  async function loadImgWithRetry(prompt, i, s, attempt) {
-    attempt = attempt || 1;
-    const maxAttempts = 5;
-    // Use high quality first, fall back to lower on retry
-    const width = attempt <= 2 ? 1280 : 800;
-    const height = attempt <= 2 ? 720 : 450;
-    const seed = Math.floor(Math.random()*99999);
-    const url = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt + ', cinematic, 4k, dramatic lighting, high quality') + '?width=' + width + '&height=' + height + '&nologo=true&seed=' + seed;
-
-    return new Promise((resolve) => {
-      const img = document.createElement('img');
-      img.className = 'scene-img';
-      img.alt = s.desc;
-      img.onload = () => {
-        document.getElementById('ph-' + i).replaceWith(img);
-        imgs.push({ url, ts: s.ts });
-        resolve(true);
-      };
-      img.onerror = async () => {
-        if (attempt < maxAttempts) {
-          document.getElementById('cap-' + i).textContent = 'Retrying... (attempt ' + (attempt+1) + ' of ' + maxAttempts + ')';
-          await new Promise(r => setTimeout(r, 2000 * attempt)); // wait longer each retry
-          resolve(await loadImgWithRetry(prompt, i, s, attempt + 1));
-        } else {
-          document.getElementById('ph-' + i).innerHTML = '<span style="color:#fc5c7c;font-size:12px;padding:20px;display:block;text-align:center">Could not load after ' + maxAttempts + ' attempts</span>';
-          resolve(false);
-        }
-      };
-      img.src = url;
-    });
-  }
-
-  for (const item of prompts.filter(Boolean)) {
-    const { prompt, i, s } = item;
-    status.textContent = 'Loading image ' + (completed+1) + ' of ' + scenes.length + '...';
-    await loadImgWithRetry(prompt, i, s, 1);
+  await Promise.allSettled(scenes.map(async (s, i) => {
+    await processScene(key, s, i, style);
     completed++;
     setProgress(completed, scenes.length);
-  }
+    setStatus(completed + ' of ' + scenes.length + ' scenes done...');
+  }));
 
-  status.textContent = 'Done — ' + scenes.length + ' scenes generated';
+  setStatus('Done — ' + scenes.length + ' scenes generated');
   btn.disabled = false;
   bar.classList.remove('show');
-  if (imgs.length) document.getElementById('downloadBtn').classList.add('show');
+
+  const successful = imgs.filter(Boolean).length;
+  if (successful > 0) document.getElementById('downloadBtn').classList.add('show');
 }
 
 async function downloadAll() {
   const btn = document.getElementById('downloadBtn');
   btn.disabled = true;
   btn.textContent = 'Preparing ZIP...';
+
   const zip = new JSZip();
   const folder = zip.folder('storyboard');
-  for (const item of imgs) {
+
+  for (let i = 0; i < imgs.length; i++) {
+    if (!imgs[i]?.url) continue;
     try {
-      const blob = await fetch(item.url).then(r => r.blob());
-      folder.file(tsToFile(item.ts), blob);
+      const blob = await fetch(imgs[i].url).then(r => r.blob());
+      folder.file(tsToFile(imgs[i].ts), blob);
     } catch(e) {}
   }
+
   const blob = await zip.generateAsync({ type: 'blob' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'storyboard.zip';
   a.click();
+
   btn.disabled = false;
   btn.textContent = 'Download All as ZIP';
 }
 </script>
 </body>
 </html>
+
 
