@@ -127,8 +127,9 @@ async function getPrompt(key, desc) {
 }
 
 function imgUrl(prompt) {
-  const basePrompt = encodeURIComponent(prompt + ', cinematic, 4k, dramatic lighting, high quality');
-  return 'https://image.pollinations.ai/prompt/' + basePrompt + '?width=1280&height=720&nologo=true';
+  const seed = Math.floor(Math.random()*99999);
+  const basePrompt = encodeURIComponent(prompt + ', cinematic, 4k, dramatic lighting');
+  return 'https://image.pollinations.ai/prompt/' + basePrompt + '?width=800&height=450&nologo=true&seed=' + seed;
 }
 
 function showErr(msg) { const e = document.getElementById('error'); e.textContent = msg; e.classList.add('show'); }
@@ -175,26 +176,59 @@ async function generate() {
 
   let completed = 0;
 
-  await Promise.all(scenes.map(async (s, i) => {
+  // Step 1: Generate all prompts in parallel (fast)
+  status.textContent = 'Generating all prompts...';
+  const prompts = await Promise.all(scenes.map(async (s, i) => {
     try {
       const prompt = await getPrompt(key, s.desc);
-      const url = imgUrl(prompt);
       document.getElementById('cap-' + i).textContent = prompt;
+      return { prompt, i, s };
+    } catch(err) {
+      document.getElementById('cap-' + i).textContent = 'Prompt failed.';
+      return null;
+    }
+  }));
+
+  // Step 2: Load images one by one with retries - never drop an image
+  async function loadImgWithRetry(prompt, i, s, attempt) {
+    attempt = attempt || 1;
+    const maxAttempts = 5;
+    // Use high quality first, fall back to lower on retry
+    const width = attempt <= 2 ? 1280 : 800;
+    const height = attempt <= 2 ? 720 : 450;
+    const seed = Math.floor(Math.random()*99999);
+    const url = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt + ', cinematic, 4k, dramatic lighting, high quality') + '?width=' + width + '&height=' + height + '&nologo=true&seed=' + seed;
+
+    return new Promise((resolve) => {
       const img = document.createElement('img');
       img.className = 'scene-img';
-      img.src = url;
       img.alt = s.desc;
-      img.loading = 'lazy';
-      document.getElementById('ph-' + i).replaceWith(img);
-      imgs.push({ url, ts: s.ts });
-    } catch(err) {
-      document.getElementById('ph-' + i).innerHTML = '<span style="color:#fc5c7c;font-size:12px;padding:20px;display:block;text-align:center">Failed: ' + err.message + '</span>';
-      document.getElementById('cap-' + i).textContent = 'Could not generate this scene.';
-    }
+      img.onload = () => {
+        document.getElementById('ph-' + i).replaceWith(img);
+        imgs.push({ url, ts: s.ts });
+        resolve(true);
+      };
+      img.onerror = async () => {
+        if (attempt < maxAttempts) {
+          document.getElementById('cap-' + i).textContent = 'Retrying... (attempt ' + (attempt+1) + ' of ' + maxAttempts + ')';
+          await new Promise(r => setTimeout(r, 2000 * attempt)); // wait longer each retry
+          resolve(await loadImgWithRetry(prompt, i, s, attempt + 1));
+        } else {
+          document.getElementById('ph-' + i).innerHTML = '<span style="color:#fc5c7c;font-size:12px;padding:20px;display:block;text-align:center">Could not load after ' + maxAttempts + ' attempts</span>';
+          resolve(false);
+        }
+      };
+      img.src = url;
+    });
+  }
+
+  for (const item of prompts.filter(Boolean)) {
+    const { prompt, i, s } = item;
+    status.textContent = 'Loading image ' + (completed+1) + ' of ' + scenes.length + '...';
+    await loadImgWithRetry(prompt, i, s, 1);
     completed++;
     setProgress(completed, scenes.length);
-    status.textContent = completed + ' of ' + scenes.length + ' scenes done...';
-  }));
+  }
 
   status.textContent = 'Done — ' + scenes.length + ' scenes generated';
   btn.disabled = false;
