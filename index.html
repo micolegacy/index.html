@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -116,7 +115,7 @@ async function getPrompt(key, desc) {
       'X-Title': 'Storyboard Generator'
     },
     body: JSON.stringify({
-      model: 'mistralai/mistral-7b-instruct:free',
+      model: 'openrouter/auto',
       max_tokens: 150,
       messages: [{ role: 'user', content: 'Write a short cinematic image generation prompt (max 50 words) for this scene. Only output the prompt, nothing else.\n\nScene: ' + desc }]
     })
@@ -222,3 +221,4 @@ async function downloadAll() {
 </script>
 </body>
 </html>
+
