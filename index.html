@@ -1,277 +1,1129 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Storyboard Generator Debug</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap');
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root { --bg: #0a0a0f; --surface: #13131a; --border: #1e1e2e; --accent: #7c5cfc; --text: #e8e8f0; --muted: #6b6b80; }
-  body { background: var(--bg); color: var(--text); font-family: 'Space Grotesk', sans-serif; min-height: 100vh; }
-  header { padding: 24px 20px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
-  .logo { font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); background: rgba(124,92,252,0.12); padding: 4px 10px; border-radius: 4px; }
-  header h1 { font-size: 18px; font-weight: 600; }
-  .container { padding: 20px; max-width: 700px; margin: 0 auto; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
-  label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-  input[type="text"], textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Space Grotesk', sans-serif; font-size: 14px; padding: 12px 14px; outline: none; resize: vertical; }
-  input[type="text"]:focus, textarea:focus { border-color: var(--accent); }
-  input[type="text"] { font-family: 'Space Mono', monospace; font-size: 13px; }
-  textarea { min-height: 160px; line-height: 1.6; }
-  .hint { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
-  .btn { display: block; width: 100%; padding: 14px; border: none; border-radius: 10px; font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; letter-spacing: 0.04em; margin-bottom: 12px; }
-  .btn-primary { background: linear-gradient(135deg, #7c5cfc, #fc5c7c); color: #fff; }
-  .btn-download { background: linear-gradient(135deg, #1a8a5a, #5cfca0); color: #0a0a0f; display: none; }
-  .btn-download.show { display: block; }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  #error, #debug { border-radius: 10px; padding: 14px 16px; font-size: 13px; white-space: pre-wrap; display: none; margin-bottom: 16px; }
-  #error { background: rgba(252,92,124,0.1); border: 1px solid rgba(252,92,124,0.3); color: #fc5c7c; }
-  #debug { background: rgba(124,92,252,0.08); border: 1px solid rgba(124,92,252,0.25); color: #d7d2ff; max-height: 240px; overflow: auto; font-family: 'Space Mono', monospace; font-size: 12px; }
-  #board { display: grid; gap: 20px; }
-  .scene { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
-  .scene-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
-  .timestamp { font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; color: var(--accent); background: rgba(124,92,252,0.12); padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
-  .scene-title { font-size: 14px; font-weight: 600; flex: 1; }
-  .scene-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
-  .scene-placeholder { width: 100%; aspect-ratio: 16/9; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
-  .spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .ph-status { font-size: 11px; color: var(--muted); font-family: 'Space Mono', monospace; white-space: pre-wrap; text-align: center; max-width: 90%; }
-  .scene-caption { padding: 12px 16px; font-size: 12px; color: var(--muted); line-height: 1.5; font-style: italic; white-space: pre-wrap; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Primary SEO Meta Tags -->
+    <title>TecVanta | Premium Web Design & Tech Solutions</title>
+    <meta name="description" content="Premium freelance web design and custom tech solutions by TecVanta. Building high-performing, accessible, and visually stunning digital experiences.">
+    <meta name="keywords" content="web design, web development, TecVanta, portfolio, freelance developer, branding, premium websites, static website, AI tools">
+    <meta name="author" content="TecVanta">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://tecvanta.github.io/">
+    <meta property="og:title" content="TecVanta | Premium Web Design & Tech Solutions">
+    <meta property="og:description" content="High-performing, modern websites and custom digital solutions tailored to elevate your brand.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1200&auto=format&fit=crop">
+
+    <!-- Tailwind CSS Play CDN (Optimized for premium light tokens with Violet accents) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',   /* Violet-50 */
+                            100: '#ede9fe',  /* Violet-100 */
+                            200: '#ddd6fe',  /* Violet-200 */
+                            300: '#c084fc',  /* Violet-300 */
+                            500: '#8b5cf6',  /* Violet-500 */
+                            600: '#7c3aed',  /* Violet-600 */
+                            700: '#6d28d9',  /* Violet-700 */
+                            800: '#5b21b6',  /* Violet-800 */
+                            900: '#4c1d95',  /* Violet-900 */
+                            950: '#1e1b4b',  /* Deep indigo/violet */
+                        },
+                        neutral: {
+                            150: '#f1f5f9',
+                            850: '#1e293b',
+                            950: '#0f172a',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts & Lucide Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Premium Styling for Custom Elements -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: #0f172a;
+            overflow-x: hidden;
+        }
+
+        /* Page change cross-fade transitions */
+        .page-content {
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+        }
+
+        .page-content.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Portfolio staggered animation setup */
+        .portfolio-grid-el {
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .portfolio-grid-el.loaded {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Custom scrollbar matching violet palette */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #ffffff;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ddd6fe;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #c084fc;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+                scroll-behavior: auto !important;
+            }
+            .page-content, .portfolio-grid-el {
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        }
+    </style>
 </head>
-<body>
-<header>
-  <span class="logo">SB</span>
-  <h1>Storyboard Generator</h1>
-</header>
+<body class="selection:bg-brand-200 selection:text-brand-900 bg-white">
 
-<div class="container">
-  <div class="card">
-    <label>OpenRouter API Key</label>
-    <input type="text" id="apiKey" placeholder="sk-or-..." autocomplete="off" oninput="saveKey()" />
-    <p class="hint">Enter your OpenRouter key here.</p>
-  </div>
+    <!-- Header & Persistent Multi-Page Navigation -->
+    <header class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100 transition-all duration-300" id="main-header">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            
+            <!-- Logo link to home state -->
+            <a href="#/home" class="flex items-center gap-2.5 group" aria-label="TecVanta Home">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-brand-500 flex items-center justify-center text-white font-bold shadow-md shadow-brand-500/15 transition-transform duration-300 group-hover:scale-105">
+                    <i data-lucide="layers" class="w-5 h-5"></i>
+                </div>
+                <span class="text-xl font-bold tracking-tight text-neutral-950 group-hover:text-brand-600 transition-colors">TecVanta</span>
+            </a>
 
-  <div class="card">
-    <label>Visual Style</label>
-    <input type="text" id="style" value="cinematic, photorealistic, dramatic lighting, film grain" />
-  </div>
+            <!-- Desktop Nav Links (Directing to simulated Multi-Page state router) -->
+            <nav class="hidden md:flex items-center gap-8" aria-label="Desktop Navigation">
+                <a href="#/home" data-route="home" class="nav-link text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors relative py-1">Home</a>
+                <a href="#/services" data-route="services" class="nav-link text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors relative py-1">Services</a>
+                <a href="#/portfolio" data-route="portfolio" class="nav-link text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors relative py-1">Portfolio</a>
+                <a href="#/about" data-route="about" class="nav-link text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors relative py-1">About</a>
+                <a href="#/contact" data-route="contact" class="px-5 py-2.5 bg-brand-600 text-white rounded-xl text-sm font-semibold hover:bg-brand-700 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-sm shadow-brand-600/10">Hire Me</a>
+            </nav>
 
-  <div class="card">
-    <label>Timestamped Script</label>
-    <textarea id="script" placeholder="0:00 - Dark city skyline at night
-0:15 - A lone figure under a streetlight"></textarea>
-  </div>
-
-  <div id="error"></div>
-  <div id="debug"></div>
-  <button class="btn btn-primary" id="generateBtn" onclick="generate()">Generate Storyboard</button>
-  <button class="btn btn-download" id="downloadBtn" onclick="downloadAll()">Download All as ZIP</button>
-  <div id="board"></div>
-</div>
-
-<script>
-const imgs = [];
-
-function log(msg) {
-  const d = document.getElementById('debug');
-  d.style.display = 'block';
-  d.textContent += (d.textContent ? '
-' : '') + msg;
-  d.scrollTop = d.scrollHeight;
-}
-
-function showErr(msg) {
-  const e = document.getElementById('error');
-  e.textContent = msg;
-  e.style.display = 'block';
-}
-
-function hideErr() {
-  document.getElementById('error').style.display = 'none';
-  document.getElementById('error').textContent = '';
-}
-
-function saveKey() {
-  const k = document.getElementById('apiKey').value.trim();
-  if (k) localStorage.setItem('or_key', k);
-}
-
-window.onload = function() {
-  const k = localStorage.getItem('or_key');
-  if (k) document.getElementById('apiKey').value = k;
-};
-
-function parseScript(txt) {
-  return txt.trim().split('
-').filter(Boolean).map(l => {
-    const m = l.match(/^(d+:d+(?::d+)?)s*[-–—]s*(.+)$/);
-    return m ? { ts: m[1], desc: m[2].trim() } : null;
-  }).filter(Boolean);
-}
-
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-async function fetchJsonWithDebug(url, options, label) {
-  log(label + ' -> request started');
-  let r;
-  try {
-    r = await fetch(url, options);
-  } catch (e) {
-    throw new Error(label + ' network error:
-' + e.message);
-  }
-  const raw = await r.text();
-  log(label + ' -> HTTP ' + r.status + ' ' + r.statusText);
-  log(label + ' -> response:
-' + raw.slice(0, 1000));
-  let data = null;
-  try { data = raw ? JSON.parse(raw) : null; } catch (e) {}
-  if (!r.ok) {
-    const msg = data?.error?.message || data?.message || raw || 'Unknown error';
-    throw new Error(label + ' HTTP ' + r.status + ':
-' + msg);
-  }
-  if (!data) throw new Error(label + ' returned non-JSON response');
-  return data;
-}
-
-async function getCinematicPrompt(key, desc, style) {
-  return fetchJsonWithDebug(
-    'https://openrouter.ai/api/v1/chat/completions',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + key,
-        'HTTP-Referer': location.origin,
-        'X-Title': 'Storyboard Generator'
-      },
-      body: JSON.stringify({
-        model: 'openrouter/auto',
-        messages: [{
-          role: 'user',
-          content: 'Write a concise image generation prompt (max 40 words) for this scene. Style: ' + style + '. Output only the prompt text.
-
-Scene: ' + desc
-        }]
-      })
-    },
-    'OpenRouter prompt'
-  ).then(d => {
-    const text = d.choices?.[0]?.message?.content;
-    if (!text) throw new Error('OpenRouter prompt response had no text');
-    return text.trim();
-  });
-}
-
-function buildImgUrl(prompt, seed) {
-  return 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) +
-    '?model=flux&width=1280&height=720&nologo=true&seed=' + seed;
-}
-
-function loadImage(url) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error('Image load failed'));
-    img.src = url;
-  });
-}
-
-async function processScene(key, scene, i, style) {
-  const phStatus = document.getElementById('ph-status-' + i);
-  const cap = document.getElementById('cap-' + i);
-  try {
-    phStatus.textContent = 'Writing prompt...';
-    const prompt = await getCinematicPrompt(key, scene.desc, style);
-    cap.textContent = prompt;
-    phStatus.textContent = 'Generating image...';
-    const url = buildImgUrl(prompt, Math.floor(Math.random() * 999999));
-    log('Pollinations -> ' + url);
-    const img = await loadImage(url);
-    img.className = 'scene-img';
-    const ph = document.getElementById('ph-' + i);
-    ph.replaceWith(img);
-    imgs[i] = { url, ts: scene.ts };
-  } catch (err) {
-    phStatus.textContent = 'FAILED
-' + err.message;
-    cap.textContent = 'Could not generate.';
-    throw err;
-  }
-}
-
-async function generate() {
-  hideErr();
-  document.getElementById('debug').textContent = '';
-  const key = document.getElementById('apiKey').value.trim();
-  const txt = document.getElementById('script').value.trim();
-  const style = document.getElementById('style').value.trim() || 'cinematic, photorealistic';
-  if (!key) return showErr('Please enter your OpenRouter API key.');
-  if (!txt) return showErr('Please enter your script.');
-
-  const scenes = parseScript(txt);
-  if (!scenes.length) return showErr('No valid lines found. Use: 0:00 - Scene description');
-
-  const btn = document.getElementById('generateBtn');
-  const board = document.getElementById('board');
-  const downloadBtn = document.getElementById('downloadBtn');
-  btn.disabled = true;
-  downloadBtn.classList.remove('show');
-  board.innerHTML = '';
-  imgs.length = 0;
-
-  scenes.forEach((s, i) => {
-    board.innerHTML += `
-      <div class="scene" id="scene-${i}">
-        <div class="scene-header">
-          <span class="timestamp">${escapeHtml(s.ts)}</span>
-          <span class="scene-title">${escapeHtml(s.desc)}</span>
+            <!-- Mobile Menu Toggle Button -->
+            <button class="md:hidden p-2 text-slate-600 hover:text-neutral-950 focus:outline-none" id="menu-toggle" aria-expanded="false" aria-controls="mobile-menu" aria-label="Toggle Navigation Menu">
+                <i data-lucide="menu" class="w-6 h-6" id="menu-icon"></i>
+            </button>
         </div>
-        <div class="scene-placeholder" id="ph-${i}">
-          <div class="spinner"></div>
-          <span class="ph-status" id="ph-status-${i}">Waiting...</span>
+
+        <!-- Mobile Navigation Drawer -->
+        <div class="hidden md:hidden bg-white border-b border-slate-100 px-6 py-6 transition-all duration-300" id="mobile-menu">
+            <nav class="flex flex-col gap-4 text-left" aria-label="Mobile Navigation">
+                <a href="#/home" data-route="home" class="mobile-link text-base font-semibold text-slate-600 hover:text-brand-600 py-1.5 border-b border-slate-50">Home</a>
+                <a href="#/services" data-route="services" class="mobile-link text-base font-semibold text-slate-600 hover:text-brand-600 py-1.5 border-b border-slate-50">Services</a>
+                <a href="#/portfolio" data-route="portfolio" class="mobile-link text-base font-semibold text-slate-600 hover:text-brand-600 py-1.5 border-b border-slate-50">Portfolio</a>
+                <a href="#/about" data-route="about" class="mobile-link text-base font-semibold text-slate-600 hover:text-brand-600 py-1.5 border-b border-slate-50">About</a>
+                <a href="#/contact" data-route="contact" class="mobile-link mt-2 text-center px-6 py-3 bg-brand-600 text-white rounded-xl text-base font-semibold hover:bg-brand-700 transition-colors">Hire Me</a>
+            </nav>
         </div>
-        <div class="scene-caption" id="cap-${i}">Generating prompt...</div>
-      </div>`;
-  });
+    </header>
 
-  const results = await Promise.allSettled(scenes.map((s, i) => processScene(key, s, i, style)));
-  const failed = results.filter(r => r.status === 'rejected').length;
-  const ok = results.length - failed;
+    <!-- Page Contents Container -->
+    <div class="pt-20 min-h-[85vh]">
 
-  if (ok > 0) downloadBtn.classList.add('show');
-  if (failed > 0) showErr(failed + ' scene(s) failed. Read the debug box above for the exact reason.');
-  if (ok === 0) showErr('Nothing generated. See debug box above.');
+        <!-- ================= PAGE 1: HOME ================= -->
+        <div id="page-home" class="page-content active container mx-auto">
+            <!-- Hero Section -->
+            <section class="relative min-h-[80vh] flex items-center py-16 overflow-hidden">
+                <!-- Abstract Premium Violet background blobs -->
+                <div class="absolute inset-0 z-0 pointer-events-none opacity-20">
+                    <div class="absolute top-10 left-10 w-80 h-80 bg-brand-200 rounded-full filter blur-[100px]"></div>
+                    <div class="absolute bottom-10 right-10 w-96 h-96 bg-fuchsia-200 rounded-full filter blur-[120px]"></div>
+                    <div class="absolute inset-0 bg-[linear-gradient(to_right,#00000002_1px,transparent_1px),linear-gradient(to_bottom,#00000002_1px,transparent_1px)] bg-[size:3rem_3rem]"></div>
+                </div>
 
-  btn.disabled = false;
-}
+                <div class="max-w-7xl mx-auto px-6 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
+                    <!-- Text Area -->
+                    <div class="lg:col-span-7 flex flex-col space-y-6 md:space-y-8 text-left">
+                        <div class="inline-flex items-center gap-2 bg-brand-50 border border-brand-100 px-4 py-1.5 rounded-full w-fit">
+                            <span class="w-2.5 h-2.5 rounded-full bg-brand-500 animate-pulse"></span>
+                            <span class="text-xs font-bold uppercase tracking-widest text-brand-700">Premium Digital Architect</span>
+                        </div>
+                        
+                        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.15]">
+                            Building Digital <br>
+                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 via-brand-500 to-fuchsia-500">Experiences That Inspire</span> <br>
+                            & Perform.
+                        </h1>
 
-async function downloadAll() {
-  const zip = new JSZip();
-  const folder = zip.folder('storyboard');
-  for (let i = 0; i < imgs.length; i++) {
-    if (!imgs[i]?.url) continue;
-    const blob = await fetch(imgs[i].url).then(r => r.blob());
-    folder.file(imgs[i].ts.replace(/:/g, '_') + '.jpg', blob);
-  }
-  const blob = await zip.generateAsync({ type: 'blob' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'storyboard.zip';
-  a.click();
-}
-</script>
+                        <p class="text-lg sm:text-xl text-slate-600 max-w-xl font-light leading-relaxed">
+                            I design and develop modern websites and build powerful brands that help businesses grow, stand out and succeed.
+                        </p>
+
+                        <div class="flex flex-wrap gap-4 items-center">
+                            <a href="#/portfolio" class="px-8 py-4 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-lg shadow-brand-500/20 hover:shadow-brand-500/30 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 flex items-center gap-2">
+                                View My Work <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </a>
+                            <a href="#/contact" class="px-8 py-4 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl hover:scale-[1.03] active:scale-[0.98] transition-all duration-200">
+                                Hire Me
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Polished Tech Mockup Representation -->
+                    <div class="lg:col-span-5 relative w-full flex items-center justify-center">
+                        <div class="relative w-full max-w-[420px] aspect-square rounded-3xl bg-slate-50 border border-slate-100 p-8 flex flex-col justify-between shadow-xl">
+                            <!-- Visual mock header -->
+                            <div class="flex items-center justify-between border-b border-slate-200/60 pb-4">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="w-3 h-3 rounded-full bg-red-400"></span>
+                                    <span class="w-3 h-3 rounded-full bg-yellow-400"></span>
+                                    <span class="w-3 h-3 rounded-full bg-green-400"></span>
+                                </div>
+                                <span class="text-xs font-mono text-slate-400">vanta_system_core.ts</span>
+                            </div>
+
+                            <!-- Abstract Graphic Design Metric elements -->
+                            <div class="my-auto py-6 space-y-4">
+                                <div class="h-4 bg-brand-100 rounded-full w-2/3"></div>
+                                <div class="h-4 bg-slate-200 rounded-full w-full"></div>
+                                <div class="h-20 bg-gradient-to-r from-brand-500 to-fuchsia-500 rounded-2xl flex items-center justify-between p-4 text-white">
+                                    <span class="text-xs font-mono">Performance Metric</span>
+                                    <span class="text-xl font-extrabold">100%</span>
+                                </div>
+                                <div class="h-4 bg-slate-100 rounded-full w-1/2"></div>
+                            </div>
+
+                            <div class="flex items-center justify-between text-xs text-slate-400 border-t border-slate-200/60 pt-4">
+                                <span>SSL Encrypted</span>
+                                <span>GitHub Pages Ready</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+
+        <!-- ================= PAGE 2: SERVICES ================= -->
+        <div id="page-services" class="page-content hidden container mx-auto">
+            <!-- Services Overview -->
+            <section class="py-16 max-w-7xl mx-auto px-6">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <p class="text-xs font-bold uppercase tracking-widest text-brand-600 mb-3">Expert Competencies</p>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Services Tailored for Modern Tech Needs</h2>
+                    <p class="text-slate-500 mt-4 leading-relaxed font-light">
+                        Combining premium structural aesthetics, robust performance, and search engine optimization.
+                    </p>
+                </div>
+
+                <!-- 4 Core Service Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- Service 1 -->
+                    <div class="bg-white border border-slate-100 rounded-2xl p-8 shadow-sm hover:shadow-md hover:border-brand-200 transition-all duration-300">
+                        <div class="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center mb-6">
+                            <i data-lucide="palette" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-950 mb-3">Website Design</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed">
+                            Bespoke visual layouts designed with deep attention to user psychology, mobile fluid structures, and consistent user flows.
+                        </p>
+                    </div>
+
+                    <!-- Service 2 -->
+                    <div class="bg-white border border-slate-100 rounded-2xl p-8 shadow-sm hover:shadow-md hover:border-brand-200 transition-all duration-300">
+                        <div class="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center mb-6">
+                            <i data-lucide="code" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-950 mb-3">Web Development</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed">
+                            Fast, lightweight, structured code leveraging modern semantic layouts to run seamlessly and quickly on static hosts.
+                        </p>
+                    </div>
+
+                    <!-- Service 3 -->
+                    <div class="bg-white border border-slate-100 rounded-2xl p-8 shadow-sm hover:shadow-md hover:border-brand-200 transition-all duration-300">
+                        <div class="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center mb-6">
+                            <i data-lucide="sparkles" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-950 mb-3">Branding & Identity</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed">
+                            Formulating strategic design guides, comprehensive typography patterns, and brand systems for commercial enterprises.
+                        </p>
+                    </div>
+
+                    <!-- Service 4 -->
+                    <div class="bg-white border border-slate-100 rounded-2xl p-8 shadow-sm hover:shadow-md hover:border-brand-200 transition-all duration-300">
+                        <div class="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center mb-6">
+                            <i data-lucide="cpu" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-950 mb-3">Tech Solutions</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed">
+                            Advanced custom web tool architecture, API automations, rapid page-speed optimizations, and deployment structures.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Shared Process Section positioned under Services Page context -->
+                <div class="mt-24 pt-16 border-t border-slate-100">
+                    <div class="text-center max-w-2xl mx-auto mb-16">
+                        <p class="text-xs font-bold uppercase tracking-widest text-brand-600 mb-3">Our Process</p>
+                        <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Structured Step-by-Step Delivery</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                        <!-- Step 1 -->
+                        <div class="text-center">
+                            <div class="w-12 h-12 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center text-lg font-bold mx-auto mb-4">1</div>
+                            <h4 class="text-base font-bold text-slate-950 mb-2">Discover</h4>
+                            <p class="text-slate-500 text-xs leading-relaxed px-4">Deep research into specific target audiences and brand guidelines.</p>
+                        </div>
+                        <!-- Step 2 -->
+                        <div class="text-center">
+                            <div class="w-12 h-12 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center text-lg font-bold mx-auto mb-4">2</div>
+                            <h4 class="text-base font-bold text-slate-950 mb-2">Plan</h4>
+                            <p class="text-slate-500 text-xs leading-relaxed px-4">Developing clean sitemaps, technical stacks, and navigation wireframes.</p>
+                        </div>
+                        <!-- Step 3 -->
+                        <div class="text-center">
+                            <div class="w-12 h-12 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center text-lg font-bold mx-auto mb-4">3</div>
+                            <h4 class="text-base font-bold text-slate-950 mb-2">Design & Develop</h4>
+                            <p class="text-slate-500 text-xs leading-relaxed px-4">Creating striking aesthetic layouts with robust, clean HTML/CSS code.</p>
+                        </div>
+                        <!-- Step 4 -->
+                        <div class="text-center">
+                            <div class="w-12 h-12 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center text-lg font-bold mx-auto mb-4">4</div>
+                            <h4 class="text-base font-bold text-slate-950 mb-2">Deliver</h4>
+                            <p class="text-slate-500 text-xs leading-relaxed px-4">Thorough quality assessments, speed tests, and seamless hosting deployment.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+
+        <!-- ================= PAGE 3: PORTFOLIO ================= -->
+        <div id="page-portfolio" class="page-content hidden container mx-auto">
+            <!-- Portfolio Section -->
+            <section class="py-16 max-w-7xl mx-auto px-6">
+                <!-- Header -->
+                <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-12">
+                    <div class="max-w-xl">
+                        <p class="text-xs font-bold uppercase tracking-widest text-brand-600 mb-3">Portfolio Showcases</p>
+                        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Recent Visual Demonstrations</h2>
+                        <p class="text-slate-500 mt-2 font-light">Explore 16 beautifully designed and colorfully selected real-world representations of my work (exactly 4 projects per service line).</p>
+                    </div>
+
+                    <!-- Category Tab Switcher -->
+                    <div class="flex flex-wrap gap-2 max-w-full overflow-x-auto pb-2" role="tablist" aria-label="Portfolio Filters">
+                        <button class="filter-btn active px-4 py-2 text-xs font-bold rounded-lg bg-brand-600 text-white transition-all duration-200" data-filter="all">All Projects</button>
+                        <button class="filter-btn px-4 py-2 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200" data-filter="websites">Website Design</button>
+                        <button class="filter-btn px-4 py-2 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200" data-filter="webdev">Web Development</button>
+                        <button class="filter-btn px-4 py-2 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200" data-filter="branding">Branding & Identity</button>
+                        <button class="filter-btn px-4 py-2 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all duration-200" data-filter="tech">Tech Solutions</button>
+                    </div>
+                </div>
+
+                <!-- 16 Project Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="portfolio-grid">
+                    
+                    <!-- --- WEBSITE DESIGN (4 Projects) --- -->
+                    <div class="portfolio-grid-el bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between" data-category="websites">
+                        <div class="relative aspect-video overflow-hidden bg-slate-100">
+                            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80" alt="Nexora Business Hub" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e0effe/0369a1?text=Nexora+Design';">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-brand-600 uppercase tracking-widest block mb-1">Website Design</span>
+                                <h3 class="text-base font-bold text-slate-950 mb-2">Nexora Business Hub</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-4">A vivid corporate interface focused on commercial data display and intuitive navigation patterns.</p>
+                            </div>
+                            <button onclick="openMockupModal('Nexora Business Hub', 'Website Design', 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80')" class="w-full py-2 bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-600 font-bold rounded-lg text-xs transition-colors mt-auto pointer-events-auto">
+                                View Case Study
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="portfolio-grid-el bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between" data-category="websites">
+                        <div class="relative aspect-video overflow-hidden bg-slate-100">
+                            <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=600&q=80" alt="Haven Realty Portal" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e0effe/0369a1?text=Haven+Realty';">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-brand-600 uppercase tracking-widest block mb-1">Website Design</span>
+                                <h3 class="text-base font-bold text-slate-950 mb-2">Haven Realty</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-4">Visually responsive and colorful property pages optimized for seamless high-resolution catalog interactions.</p>
+                            </div>
+                            <button onclick="openMockupModal('Haven Realty Portal', 'Website Design', 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80')" class="w-full py-2 bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-600 font-bold rounded-lg text-xs transition-colors mt-auto">
+                                View Case Study
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="portfolio-grid-el bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between" data-category="websites">
+                        <div class="relative aspect-video overflow-hidden bg-slate-100">
+                            <img src="https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=600&q=80" alt="Solaria Solar Tech" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e0effe/0369a1?text=Solaria+Tech';">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-brand-600 uppercase tracking-widest block mb-1">Website Design</span>
+                                <h3 class="text-base font-bold text-slate-950 mb-2">Solaria Clean Tech</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-4">Bright, impactful environmental corporate setup highlighting renewable power structures.</p>
+                            </div>
+                            <button onclick="openMockupModal('Solaria Clean Tech', 'Website Design', 'https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=800&q=80')" class="w-full py-2 bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-600 font-bold rounded-lg text-xs transition-colors mt-auto">
+                                View Case Study
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="portfolio-grid-el bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between" data-category="websites">
+                        <div class="relative aspect-video overflow-hidden bg-slate-100">
+                            <img src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80" alt="Apex Legal Advisors" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e0effe/0369a1?text=Apex+Advisors';">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-brand-600 uppercase tracking-widest block mb-1">Website Design</span>
+                                <h3 class="text-base font-bold text-slate-950 mb-2">Apex Legal Portal</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-4">Sophisticated, high-contrast visual system optimized for secure user interaction and booking schedules.</p>
+                            </div>
+                            <button onclick="openMockupModal('Apex Legal Portal', 'Website Design', 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80')" class="w-full py-2 bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-600 font-bold rounded-lg text-xs transition-colors mt-auto">
+                                View Case Study
+                            </button>
+                        </div>
+                    </div>
+
+
+                    <!-- --- WEB DEVELOPMENT (4 Projects) --- -->
+                    <div class="portfolio-grid-el bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between" data-category="webdev">
+                        <div class="relative aspect-video overflow-hidden bg-slate-100">
+                            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80" alt="Analytics Pro SaaS" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e0effe/0369a1?text=Analytics+SaaS';">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-brand-600 uppercase tracking-widest block mb-1">Web Development</span>
+                                <h3 class="text-base font-bold text-slate-950 mb-2">Analytics Pro SaaS</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-4">Engineered with high performance metrics, offering live updates and complex graph tracking features.</p>
+                            </div>
+                            <button onclick="openMockupModal('Analytics Pro SaaS', 'Web Development', 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80')" class="w-full py-2 bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-600 font-bold rounded-lg text-xs transition-colors mt-auto">
+                                View Case Study
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="portfolio-grid-el bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between" data-category="webdev">
+                        <div class="relative aspect-video overflow-hidden bg-slate-100">
+                            <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=600&q=80" alt="MedConnect Hub" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e0effe/0369a1?text=MedConnect';">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-brand-600 uppercase tracking-widest block mb-1">Web Development</span>
+                                <h3 class="text-base font-bold text-slate-950 mb-2">MedConnect Portal</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-4">Accessible, secure patient booking pipeline styled beautifully and fully WCAG-compliant.</p>
+                            </div>
+                            <button onclick="openMockupModal('MedConnect Portal', 'Web Development', 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80')" class="w-full py-2 bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-600 font-bold rounded-lg text-xs transition-colors mt-auto">
+                                View Case Study
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="portfolio-grid-el bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between" data-category="webdev">
+                        <div class="relative aspect-video overflow-hidden bg-slate-100">
+                            <img src="https://images.unsplash.com/photo-1642543492481-44e81e3914a7?auto=format&fit=crop&w=600&q=80" alt="FinTrack Crypto Dashboard" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e0effe/0369a1?text=FinTrack';">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-brand-600 uppercase tracking-widest block mb-1">Web Development</span>
+                                <h3 class="text-base font-bold text-slate-950 mb-2">FinTrack Crypto</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-4">Stunning neon graphs displaying live data streams, built entirely with robust CSS3 modules.</p>
+                            </div>
+                            <button onclick="openMockupModal('FinTrack Crypto Dashboard', 'Web Development', 'https://images.unsplash.com/photo-1642543492481-44e81e3914a7?auto=format&fit=crop&w=800&q=80')" class="w-full py-2 bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-600 font-bold rounded-lg text-xs transition-colors mt-auto">
+                                View Case Study
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="portfolio-grid-el bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between" data-category="webdev">
+                        <div class="relative aspect-video overflow-hidden bg-slate-100">
+                            <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=80" alt="EduLearn LMS Application" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e0effe/0369a1?text=EduLearn';">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-brand-600 uppercase tracking-widest block mb-1">Web Development</span>
+                                <h3 class="text-base font-bold text-slate-950 mb-2">EduLearn Platform</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-4">Fast-loading course portal layout leveraging structured JavaScript APIs and lightweight local data.</p>
+                            </div>
+                            <button onclick="openMockupModal('EduLearn Platform', 'Web Development', 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80')" class="w-full py-2 bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-600 font-bold rounded-lg text-xs transition-colors mt-auto">
+                                View Case Study
+                            </button>
+                        </div>
+                    </div>
+
+
+                    <!-- --- BRANDING & IDENTITY (4 Projects) --- -->
+                    <div class="portfolio-grid-el bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between" data-category="branding">
+                        <div class="relative aspect-video overflow-hidden bg-slate-100">
+                            <img src="https://images.unsplash.com/photo-1522542550221-31fd19575a2d?auto=format&fit=crop&w=600&q=80" alt="Vanta Rebranding" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e0effe/0369a1?text=Vanta+Brand';">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-brand-600 uppercase tracking-widest block mb-1">Branding & Identity</span>
+                                <h3 class="text-base font-bold text-slate-950 mb-2">Vanta Visual Identity</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-4">Extremely colorful asset manuals defining color frameworks, geometric logos, and print guides.</p>
+                            </div>
+                            <button onclick="openMockupModal('Vanta Visual Identity', 'Branding & Identity', 'https://images.unsplash.com/photo-1522542550221-31fd19575a2d?auto=format&fit=crop&w=800&q=80')" class="w-full py-2 bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-600 font-bold rounded-lg text-xs transition-colors mt-auto">
+                                View Case Study
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="portfolio-grid-el bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between" data-category="branding">
+                        <div class="relative aspect-video overflow-hidden bg-slate-100">
+                            <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=600&q=80" alt="LuxeWear Identity" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e0effe/0369a1?text=LuxeWear+Brand';">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-brand-600 uppercase tracking-widest block mb-1">Branding & Identity</span>
+                                <h3 class="text-base font-bold text-slate-950 mb-2">LuxeWear Luxury Label</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-4">High-contrast modern brand strategy, customized typography systems, and boutique visual styling.</p>
+                            </div>
+                            <button onclick="openMockupModal('LuxeWear Luxury Label', 'Branding & Identity', 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=80')" class="w-full py-2 bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-600 font-bold rounded-lg text-xs transition-colors mt-auto">
+                                View Case Study
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="portfolio-grid-el bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between" data-category="branding">
+                        <div class="relative aspect-video overflow-hidden bg-slate-100">
+                            <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=600&q=80" alt="Nova Coffee Packaging" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e0effe/0369a1?text=Nova+Coffee';">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-brand-600 uppercase tracking-widest block mb-1">Branding & Identity</span>
+                                <h3 class="text-base font-bold text-slate-950 mb-2">Nova Coffee Co.</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-4">Cheerful, organic coffee-focused design including illustrations, packages, and custom typography assets.</p>
+                            </div>
+                            <button onclick="openMockupModal('Nova Coffee Co.', 'Branding & Identity', 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=800&q=80')" class="w-full py-2 bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-600 font-bold rounded-lg text-xs transition-colors mt-auto">
+                                View Case Study
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="portfolio-grid-el bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between" data-category="branding">
+                        <div class="relative aspect-video overflow-hidden bg-slate-100">
+                            <img src="https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&w=600&q=80" alt="Zenith Stationery" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e0effe/0369a1?text=Zenith+Brand';">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-brand-600 uppercase tracking-widest block mb-1">Branding & Identity</span>
+                                <h3 class="text-base font-bold text-slate-950 mb-2">Zenith Creative Assets</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-4">Vibrant corporate visual guidelines, cohesive pattern grids, and stylized presentation elements.</p>
+                            </div>
+                            <button onclick="openMockupModal('Zenith Creative Assets', 'Branding & Identity', 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&w=800&q=80')" class="w-full py-2 bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-600 font-bold rounded-lg text-xs transition-colors mt-auto">
+                                View Case Study
+                            </button>
+                        </div>
+                    </div>
+
+
+                    <!-- --- TECH SOLUTIONS (4 Projects) --- -->
+                    <div class="portfolio-grid-el bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between" data-category="tech">
+                        <div class="relative aspect-video overflow-hidden bg-slate-100">
+                            <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=600&q=80" alt="ShopSync API tool" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e0effe/0369a1?text=ShopSync';">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-brand-600 uppercase tracking-widest block mb-1">Tech Solutions</span>
+                                <h3 class="text-base font-bold text-slate-950 mb-2">ShopSync Integration</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-4">Custom multi-channel software bridging product catalogs with lightning-fast cloud architecture.</p>
+                            </div>
+                            <button onclick="openMockupModal('ShopSync Integration', 'Tech Solutions', 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80')" class="w-full py-2 bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-600 font-bold rounded-lg text-xs transition-colors mt-auto">
+                                View Case Study
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="portfolio-grid-el bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between" data-category="tech">
+                        <div class="relative aspect-video overflow-hidden bg-slate-100">
+                            <img src="https://images.unsplash.com/photo-1557200134-90327ee9fafa?auto=format&fit=crop&w=600&q=80" alt="AutoMail System diagram" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e0effe/0369a1?text=AutoMail';">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-brand-600 uppercase tracking-widest block mb-1">Tech Solutions</span>
+                                <h3 class="text-base font-bold text-slate-950 mb-2">AutoMail CRM System</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-4">Highly visual communication routing engine, optimizing notification pathways and message triggers.</p>
+                            </div>
+                            <button onclick="openMockupModal('AutoMail CRM System', 'Tech Solutions', 'https://images.unsplash.com/photo-1557200134-90327ee9fafa?auto=format&fit=crop&w=800&q=80')" class="w-full py-2 bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-600 font-bold rounded-lg text-xs transition-colors mt-auto">
+                                View Case Study
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="portfolio-grid-el bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between" data-category="tech">
+                        <div class="relative aspect-video overflow-hidden bg-slate-100">
+                            <img src="https://images.unsplash.com/photo-1563986768494-0d2b4b323b3f?auto=format&fit=crop&w=600&q=80" alt="SecureGate Cybersecurity Shield" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e0effe/0369a1?text=SecureGate';">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-brand-600 uppercase tracking-widest block mb-1">Tech Solutions</span>
+                                <h3 class="text-base font-bold text-slate-950 mb-2">SecureGate Auth</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-4">Advanced layout setup for multi-factor authorization systems built with maximum focus on security.</p>
+                            </div>
+                            <button onclick="openMockupModal('SecureGate Auth', 'Tech Solutions', 'https://images.unsplash.com/photo-1563986768494-0d2b4b323b3f?auto=format&fit=crop&w=800&q=80')" class="w-full py-2 bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-600 font-bold rounded-lg text-xs transition-colors mt-auto">
+                                View Case Study
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="portfolio-grid-el bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between" data-category="tech">
+                        <div class="relative aspect-video overflow-hidden bg-slate-100">
+                            <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80" alt="CloudScale AWS Constellation" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e0effe/0369a1?text=CloudScale';">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-brand-600 uppercase tracking-widest block mb-1">Tech Solutions</span>
+                                <h3 class="text-base font-bold text-slate-950 mb-2">CloudScale Migration</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-4">Serverless cloud systems layout, achieving lightning fast speeds and simple, secure deployment scales.</p>
+                            </div>
+                            <button onclick="openMockupModal('CloudScale Migration', 'Tech Solutions', 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80')" class="w-full py-2 bg-slate-100 hover:bg-brand-50 text-slate-700 hover:text-brand-600 font-bold rounded-lg text-xs transition-colors mt-auto">
+                                View Case Study
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+
+
+        <!-- ================= PAGE 4: ABOUT ================= -->
+        <div id="page-about" class="page-content hidden container mx-auto">
+            <!-- About Section -->
+            <section class="py-16 max-w-7xl mx-auto px-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                    
+                    <!-- Left Image Mock Column -->
+                    <div class="lg:col-span-5 relative">
+                        <div class="relative bg-gradient-to-br from-brand-50 to-white border border-brand-100 rounded-3xl p-8 shadow-md overflow-hidden text-left">
+                            <div class="absolute -top-12 -right-12 w-48 h-48 bg-brand-200/40 rounded-full filter blur-2xl"></div>
+                            
+                            <h3 class="text-xs font-bold text-brand-600 uppercase tracking-wider mb-1">The Mind Behind</h3>
+                            <h4 class="text-2xl font-extrabold text-slate-900 mb-6">TecVanta Design</h4>
+                            
+                            <p class="text-slate-600 text-sm leading-relaxed mb-6">
+                                Bringing logical software optimization practices to visual brand design. Establishing high standards of development on static hosting targets.
+                            </p>
+
+                            <div class="grid grid-cols-2 gap-4 border-t border-slate-100 pt-6">
+                                <div>
+                                    <span class="text-2xl font-extrabold text-brand-600 block">40+</span>
+                                    <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Shipped Sites</span>
+                                </div>
+                                <div>
+                                    <span class="text-2xl font-extrabold text-brand-600 block">100%</span>
+                                    <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Satisfaction</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Copy Column -->
+                    <div class="lg:col-span-7 text-left space-y-6">
+                        <p class="text-xs font-bold uppercase tracking-widest text-brand-600 self-start">About TecVanta</p>
+                        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Designing Solutions. Building Trust.</h2>
+                        
+                        <p class="text-slate-600 leading-relaxed font-light text-base">
+                            I’m a freelance tech expert and designer focused on creating modern websites, strong brands and digital experiences that help businesses grow.
+                        </p>
+
+                        <!-- Key advantages as bulleted blocks -->
+                        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4" aria-label="Key Competencies">
+                            <li class="flex items-start gap-3">
+                                <span class="w-6 h-6 rounded bg-brand-100 text-brand-600 flex items-center justify-center shrink-0 mt-0.5">
+                                    <i data-lucide="check" class="w-4 h-4"></i>
+                                </span>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-slate-900">Clean Modern Designs</h4>
+                                    <p class="text-xs text-slate-500 mt-0.5">Highly balanced, structural grids.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="w-6 h-6 rounded bg-brand-100 text-brand-600 flex items-center justify-center shrink-0 mt-0.5">
+                                    <i data-lucide="check" class="w-4 h-4"></i>
+                                </span>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-slate-900">Mobile Responsive Layouts</h4>
+                                    <p class="text-xs text-slate-500 mt-0.5">Responsive and adaptive.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="w-6 h-6 rounded bg-brand-100 text-brand-600 flex items-center justify-center shrink-0 mt-0.5">
+                                    <i data-lucide="check" class="w-4 h-4"></i>
+                                </span>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-slate-900">Performance Focused</h4>
+                                    <p class="text-xs text-slate-500 mt-0.5">Blazing fast core Web Vitals.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="w-6 h-6 rounded bg-brand-100 text-brand-600 flex items-center justify-center shrink-0 mt-0.5">
+                                    <i data-lucide="check" class="w-4 h-4"></i>
+                                </span>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-slate-900">SEO & Accessibility Aware</h4>
+                                    <p class="text-xs text-slate-500 mt-0.5">High search visibility and WCAG scores.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+
+                <!-- Integrated Testimonials block -->
+                <div class="mt-24 pt-16 border-t border-slate-100 text-left">
+                    <div class="max-w-2xl mb-12">
+                        <p class="text-xs font-bold uppercase tracking-widest text-brand-600 mb-2">Social Proof</p>
+                        <h3 class="text-2xl font-extrabold text-slate-900">Reliable Client Reviews</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                            <div class="flex text-amber-500 gap-1 mb-4">
+                                <i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                            </div>
+                            <p class="text-slate-600 text-xs leading-relaxed italic mb-4">"TecVanta completed our entire corporate redesign with high diligence. The loading times of our pages improved by over 200%!"</p>
+                            <h5 class="text-xs font-bold text-slate-950">Adrian Hughes &mdash; Director, Nexora</h5>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                            <div class="flex text-amber-500 gap-1 mb-4">
+                                <i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                            </div>
+                            <p class="text-slate-600 text-xs leading-relaxed italic mb-4">"Outstanding interface design and clean engineering structures. Communication was super simple and deliveries came right on schedule."</p>
+                            <h5 class="text-xs font-bold text-slate-950">Sarah Miller &mdash; Founder, NutriWell</h5>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                            <div class="flex text-amber-500 gap-1 mb-4">
+                                <i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                            </div>
+                            <p class="text-slate-600 text-xs leading-relaxed italic mb-4">"The brand manual crafted by TecVanta gave our startup teams a flawless visual standard to deploy in our commercial assets."</p>
+                            <h5 class="text-xs font-bold text-slate-950">Marcus King &mdash; Brand Lead, LuxeWear</h5>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+
+        <!-- ================= PAGE 5: CONTACT ================= -->
+        <div id="page-contact" class="page-content hidden container mx-auto">
+            <!-- Contact Form and CTA Grid -->
+            <section class="py-16 max-w-7xl mx-auto px-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                    
+                    <!-- Form Column -->
+                    <div class="lg:col-span-7 bg-white border border-slate-100 rounded-3xl p-8 shadow-md relative text-left">
+                        
+                        <!-- Custom Alert Toast notification block -->
+                        <div id="toast" class="hidden absolute top-4 left-4 right-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl p-4 flex items-center gap-3 shadow-lg z-20">
+                            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600 shrink-0"></i>
+                            <div class="text-xs">
+                                <strong class="block font-bold">Message Submitted Successfully!</strong>
+                                <span class="text-emerald-700">Thanks for reaching out. We will connect at tecvanta@gmail.com.</span>
+                            </div>
+                        </div>
+
+                        <h3 class="text-2xl font-extrabold text-slate-900 mb-2">Request Consultation</h3>
+                        <p class="text-slate-500 text-sm mb-6 font-light">Tell me about your branding aspirations or development roadmap.</p>
+
+                        <form id="contact-form" class="space-y-6">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="name" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Your Name</label>
+                                    <input type="text" id="name" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:border-brand-500 transition-colors" placeholder="Adrian Hughes">
+                                </div>
+                                <div>
+                                    <label for="email" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Email Address</label>
+                                    <input type="email" id="email" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:border-brand-500 transition-colors" placeholder="adrian@example.com">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="subject" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Subject</label>
+                                <input type="text" id="subject" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:border-brand-500 transition-colors" placeholder="Corporate Rebrand Strategy">
+                            </div>
+
+                            <div>
+                                <label for="message" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Your Message</label>
+                                <textarea id="message" rows="5" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:border-brand-500 transition-colors resize-none" placeholder="Details about sitemaps, timeline constraints, or design inspiration..."></textarea>
+                            </div>
+
+                            <button type="submit" class="w-full py-4 bg-brand-600 text-white font-bold rounded-xl hover:bg-brand-700 transition-colors flex items-center justify-center gap-2 shadow-sm shadow-brand-600/10 active:scale-[0.99]">
+                                Send Message <i data-lucide="send" class="w-4 h-4"></i>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Contact Information Column -->
+                    <div class="lg:col-span-5 text-left space-y-8 lg:pt-8">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-widest text-brand-600 mb-2">Connect Directly</p>
+                            <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">Let's Build Something Exceptional</h2>
+                            <p class="text-slate-500 mt-4 leading-relaxed font-light">
+                                Ready to schedule a direct sitemap layout, branding blueprint, or optimization audit? Get in touch and let's get started.
+                            </p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
+                                    <i data-lucide="mail" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-widest">Inbox</span>
+                                    <a href="mailto:tecvanta@gmail.com" class="text-sm font-semibold text-slate-700 hover:text-brand-600 transition-colors">tecvanta@gmail.com</a>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
+                                    <i data-lucide="map-pin" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-widest">Headquarters</span>
+                                    <span class="text-sm font-semibold text-slate-700">Remote Worldwide</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-6 border-t border-slate-100">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Availability Status</h4>
+                            <div class="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-100 px-4 py-2 rounded-xl text-emerald-800 text-xs font-semibold">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                Currently Booking Q3-Q4 Work
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+
+    </div>
+
+    <!-- Case Study / Mockup Visual Details Modal (Accessible Modal Box) -->
+    <div id="mockup-modal" class="fixed inset-0 z-50 hidden bg-slate-950/40 backdrop-blur-sm flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="bg-white rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl relative text-left border border-slate-100">
+            <button onclick="closeMockupModal()" class="absolute top-4 right-4 p-2 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors" aria-label="Close Modal">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="aspect-video w-full bg-slate-100 relative overflow-hidden">
+                <img id="modal-img" src="" alt="Project Preview" class="w-full h-full object-cover">
+            </div>
+            <div class="p-8">
+                <span id="modal-tag" class="text-[10px] font-bold text-brand-600 uppercase tracking-widest block mb-1">Tag</span>
+                <h4 id="modal-title" class="text-xl font-extrabold text-slate-950 mb-4">Project Title</h4>
+                <p class="text-slate-600 text-xs leading-relaxed mb-6">
+                    This colorful representation showcases premium visual systems matching accessibility standards and static platform constraints. Optimized for swift client downloads.
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <a id="modal-action-btn" href="#/contact" class="px-5 py-2.5 bg-brand-600 text-white font-bold rounded-lg text-xs hover:bg-brand-700 transition-colors inline-block">
+                        Discuss Similar Project
+                    </a>
+                    <button onclick="closeMockupModal()" class="px-5 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-lg text-xs hover:bg-slate-200 transition-colors">
+                        Close Showcase
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Persistent Footer element -->
+    <footer class="bg-slate-50 border-t border-slate-100 py-12 text-left">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+            
+            <!-- Brand -->
+            <a href="#/home" class="flex items-center gap-2.5" aria-label="TecVanta Home">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-600 to-brand-500 flex items-center justify-center text-white font-bold">
+                    <i data-lucide="layers" class="w-4 h-4"></i>
+                </div>
+                <span class="text-base font-bold tracking-tight text-slate-950">TecVanta</span>
+            </a>
+
+            <!-- Copyright and SEO Friendly indicators -->
+            <p class="text-xs text-slate-400 font-light">
+                &copy; 2026 TecVanta. Engineered with accessibility standards. Contact: <a href="mailto:tecvanta@gmail.com" class="text-brand-600 font-semibold hover:underline">tecvanta@gmail.com</a>
+            </p>
+
+            <!-- Social Links Placeholder (Using simple vector icons) -->
+            <div class="flex gap-4">
+                <a href="#" class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-brand-600 transition-colors" aria-label="GitHub Profile">
+                    <i data-lucide="github" class="w-4 h-4"></i>
+                </a>
+                <a href="#" class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-brand-600 transition-colors" aria-label="LinkedIn Profile">
+                    <i data-lucide="linkedin" class="w-4 h-4"></i>
+                </a>
+                <a href="mailto:tecvanta@gmail.com" class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-brand-600 transition-colors" aria-label="Email Directly">
+                    <i data-lucide="mail" class="w-4 h-4"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- Vanilla Javascript Router and Interactions -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Pages router list
+        const pages = ['home', 'services', 'portfolio', 'about', 'contact'];
+
+        // Static routing engine switching content views smoothly
+        function router() {
+            // Get current path or default to home
+            let hash = window.location.hash || '#/home';
+            let pageId = hash.replace('#/', '') || 'home';
+
+            // Ensure route exists
+            if (!pages.includes(pageId)) {
+                pageId = 'home';
+                window.location.hash = '#/home';
+            }
+
+            // Iterate and swap container active class tags
+            pages.forEach(p => {
+                const element = document.getElementById('page-' + p);
+                if (element) {
+                    if (p === pageId) {
+                        element.classList.remove('hidden');
+                        element.classList.add('block');
+                        // Small timeout to allow transition effects
+                        setTimeout(() => {
+                            element.classList.add('active');
+                        }, 50);
+                    } else {
+                        element.classList.remove('active');
+                        element.classList.add('hidden');
+                    }
+                }
+            });
+
+            // Update Navigation Menu Links
+            updateNavbarLinks(pageId);
+
+            // Stagger load the portfolio layout if navigating to portfolio page
+            if (pageId === 'portfolio') {
+                triggerPortfolioStagger();
+            }
+
+            // Scroll cleanly to the top of simulated page state
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Keep active navbar classes accurately highlighted
+        function updateNavbarLinks(activeId) {
+            // Desktop Link Highlights
+            document.querySelectorAll('.nav-link').forEach(link => {
+                const route = link.getAttribute('data-route');
+                if (route === activeId) {
+                    link.classList.add('text-brand-600', 'border-b-2', 'border-brand-500');
+                    link.classList.remove('text-slate-600');
+                } else {
+                    link.classList.remove('text-brand-600', 'border-b-2', 'border-brand-500');
+                    link.classList.add('text-slate-600');
+                }
+            });
+
+            // Mobile Link Highlights
+            document.querySelectorAll('.mobile-link').forEach(link => {
+                const route = link.getAttribute('data-route');
+                if (route === activeId) {
+                    link.classList.add('text-brand-600', 'pl-2');
+                    link.classList.remove('text-slate-600');
+                } else {
+                    link.classList.remove('text-brand-600', 'pl-2');
+                    link.classList.add('text-slate-600');
+                }
+            });
+        }
+
+        // Window event listeners for page router
+        window.addEventListener('hashchange', router);
+        window.addEventListener('load', () => {
+            // Handle initial entry route checks
+            if (!window.location.hash) {
+                window.location.hash = '#/home';
+            }
+            router();
+        });
+
+
+        // Responsive Mobile Menu Drawer Toggle
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+
+        menuToggle.addEventListener('click', () => {
+            const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
+            menuToggle.setAttribute('aria-expanded', !isExpanded);
+            mobileMenu.classList.toggle('hidden');
+            
+            // Toggle icon asset
+            if (!isExpanded) {
+                menuIcon.setAttribute('data-lucide', 'x');
+            } else {
+                menuIcon.setAttribute('data-lucide', 'menu');
+            }
+            lucide.createIcons();
+        });
+
+        // Close mobile drawer automatically upon choosing a nav link
+        document.querySelectorAll('.mobile-link').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+                menuToggle.setAttribute('aria-expanded', 'false');
+                menuIcon.setAttribute('data-lucide', 'menu');
+                lucide.createIcons();
+            });
+        });
+
+
+        // Header dynamic layout changes during window scrolling
+        const mainHeader = document.getElementById('main-header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) {
+                mainHeader.classList.remove('h-20');
+                mainHeader.classList.add('h-16', 'shadow-sm', 'bg-white/95');
+            } else {
+                mainHeader.classList.remove('h-16', 'shadow-sm', 'bg-white/95');
+                mainHeader.classList.add('h-20');
+            }
+        });
+
+
+        // Portfolio Filters Layout controls
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const portfolioItems = document.querySelectorAll('.portfolio-grid-el');
+
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active classes
+                filterButtons.forEach(b => {
+                    b.classList.remove('active', 'bg-brand-600', 'text-white');
+                    b.classList.add('bg-slate-100', 'text-slate-600');
+                });
+
+                // Set active classes on target button
+                btn.classList.add('active', 'bg-brand-600', 'text-white');
+                btn.classList.remove('bg-slate-100', 'text-slate-600');
+
+                const filterValue = btn.getAttribute('data-filter');
+
+                // Animate elements visibility
+                portfolioItems.forEach(item => {
+                    const category = item.getAttribute('data-category');
+                    if (filterValue === 'all' || category === filterValue) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                triggerPortfolioStagger();
+            });
+        });
+
+        // Soft staggered sequence entry for active catalog elements
+        function triggerPortfolioStagger() {
+            portfolioItems.forEach((item, index) => {
+                item.classList.remove('loaded');
+                if (item.style.display !== 'none') {
+                    setTimeout(() => {
+                        item.classList.add('loaded');
+                    }, index * 50);
+                }
+            });
+        }
+
+
+        // Mock Contact form submission pipeline with visual feedback
+        const contactForm = document.getElementById('contact-form');
+        const toast = document.getElementById('toast');
+
+        if (contactForm) {
+            contactForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                // Show custom toast notification
+                toast.classList.remove('hidden');
+                
+                // Reset inputs and close window after delay
+                contactForm.reset();
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 5000);
+            });
+        }
+
+        // Case Study Dialog Controls (mockup image is not clickable, only explicit button clicks launch this)
+        const mockupModal = document.getElementById('mockup-modal');
+        const modalImg = document.getElementById('modal-img');
+        const modalTitle = document.getElementById('modal-title');
+        const modalTag = document.getElementById('modal-tag');
+
+        function openMockupModal(title, category, imgSrc) {
+            modalImg.src = imgSrc;
+            modalTitle.textContent = title;
+            modalTag.textContent = category;
+            mockupModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Lock scrolling
+        }
+
+        function closeMockupModal() {
+            mockupModal.classList.add('hidden');
+            document.body.style.overflow = 'auto'; // Unlock scrolling
+        }
+
+        // Close modal if overlay backdrop clicked directly
+        if (mockupModal) {
+            mockupModal.addEventListener('click', (e) => {
+                if (e.target === mockupModal) {
+                    closeMockupModal();
+                }
+            });
+        }
+    </script>
 </body>
 </html>
