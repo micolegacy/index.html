@@ -29,11 +29,11 @@
   .btn-primary { background: linear-gradient(135deg, #7c5cfc, #fc5c7c); color: #fff; }
   .btn-download { background: linear-gradient(135deg, #1a8a5a, #5cfca0); color: #0a0a0f; display: none; }
   .btn-download.show { display: block; }
-  #status { display: none; font-size: 13px; color: var(--muted); text-align: center; padding: 10px 0; font-family: 'Space Mono', monospace; }
+  #status { display: none; font-size: 13px; color: var(--muted); text-align: center; padding: 10px 0; font-family: 'Space Mono', monospace; white-space: pre-wrap; }
   .progress-bar { height: 2px; background: var(--border); border-radius: 2px; margin: 4px 0 16px; overflow: hidden; display: none; }
   .progress-bar.show { display: block; }
   .progress-fill { height: 100%; background: linear-gradient(90deg, #7c5cfc, #fc5c7c); width: 0%; transition: width 0.3s ease; }
-  #error { background: rgba(252,92,124,0.1); border: 1px solid rgba(252,92,124,0.3); border-radius: 10px; padding: 14px 16px; font-size: 13px; color: #fc5c7c; display: none; margin-bottom: 16px; }
+  #error { background: rgba(252,92,124,0.1); border: 1px solid rgba(252,92,124,0.3); border-radius: 10px; padding: 14px 16px; font-size: 13px; color: #fc5c7c; display: none; margin-bottom: 16px; white-space: pre-wrap; }
   #error.show { display: block; }
   #board { display: grid; gap: 20px; }
   .scene { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; animation: fadeUp 0.4s ease both; }
@@ -45,8 +45,8 @@
   .scene-placeholder { width: 100%; aspect-ratio: 16/9; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
   .spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .ph-status { font-size: 11px; color: var(--muted); font-family: 'Space Mono', monospace; }
-  .scene-caption { padding: 12px 16px; font-size: 12px; color: var(--muted); line-height: 1.5; font-style: italic; }
+  .ph-status { font-size: 11px; color: var(--muted); font-family: 'Space Mono', monospace; white-space: pre-wrap; text-align: center; max-width: 90%; }
+  .scene-caption { padding: 12px 16px; font-size: 12px; color: var(--muted); line-height: 1.5; font-style: italic; white-space: pre-wrap; }
 </style>
 </head>
 <body>
@@ -111,6 +111,7 @@ window.onload = function() {
     setStatus('Last session restored. Generate again to refresh.');
     document.getElementById('status').style.display = 'block';
   }
+
   if (savedImgs) {
     try {
       const parsed = JSON.parse(savedImgs);
@@ -178,13 +179,22 @@ Scene: ' + desc
     })
   });
 
-  if (!r.ok) {
-    const e = await r.json().catch(() => ({}));
-    throw new Error(e.error?.message || 'Prompt API error');
+  const raw = await r.text();
+  let data;
+  try {
+    data = JSON.parse(raw);
+  } catch (e) {
+    throw new Error('OpenRouter returned non-JSON response:
+' + raw.slice(0, 400));
   }
 
-  const d = await r.json();
-  const text = d.choices?.[0]?.message?.content;
+  if (!r.ok) {
+    const msg = data?.error?.message || data?.message || raw || 'Prompt API error';
+    throw new Error('OpenRouter error ' + r.status + ':
+' + msg);
+  }
+
+  const text = data.choices?.[0]?.message?.content;
   if (!text) throw new Error('Empty response from AI');
   return text.trim();
 }
@@ -218,10 +228,13 @@ async function loadImageWithRetry(prompt, scene, i, attempt) {
   } catch (e) {
     const phStatus = document.getElementById('ph-status-' + i);
     if (attempt < maxAttempts) {
-      if (phStatus) phStatus.textContent = 'Retry ' + attempt + '/' + maxAttempts + '...';
+      if (phStatus) phStatus.textContent = 'Retry ' + attempt + '/' + maxAttempts + '...
+' + e.message;
       await new Promise(r => setTimeout(r, 2000 * attempt));
       return loadImageWithRetry(prompt, scene, i, attempt + 1);
     }
+    if (phStatus) phStatus.textContent = 'Image failed after ' + maxAttempts + ' attempts.
+' + e.message;
     return null;
   }
 }
@@ -247,8 +260,13 @@ async function processScene(key, scene, i, style) {
     }
   } catch (err) {
     const ph = document.getElementById('ph-' + i);
-    if (ph) ph.innerHTML = '<span style="color:#fc5c7c;font-size:12px;padding:20px;display:block;text-align:center">Failed: ' + escapeHtml(err.message) + '</span>';
+    const msg = escapeHtml(err.message || 'Unknown error');
+    if (ph) {
+      ph.innerHTML = '<span style="color:#fc5c7c;font-size:12px;padding:20px;display:block;text-align:left;white-space:pre-wrap">Failed:
+' + msg + '</span>';
+    }
     if (cap) cap.textContent = 'Could not generate.';
+    throw err;
   }
 }
 
@@ -293,16 +311,21 @@ async function generate() {
   });
 
   let completed = 0;
-  await Promise.allSettled(scenes.map(async (s, i) => {
-    await processScene(key, s, i, style);
-    completed++;
-    setProgress(completed, scenes.length);
-    setStatus(completed + ' of ' + scenes.length + ' scenes done...');
+  const results = await Promise.allSettled(scenes.map(async (s, i) => {
+    try {
+      await processScene(key, s, i, style);
+    } finally {
+      completed++;
+      setProgress(completed, scenes.length);
+      setStatus(completed + ' of ' + scenes.length + ' scenes done...');
+    }
   }));
 
+  const failed = results.filter(r => r.status === 'rejected');
   const successful = imgs.filter(Boolean).length;
+
   if (successful === 0) {
-    setStatus('All scenes failed. Check your API key and try again.');
+    setStatus('All scenes failed. Check the error messages above.');
   } else {
     setStatus('Done — ' + successful + ' of ' + scenes.length + ' scenes generated');
     document.getElementById('downloadBtn').classList.add('show');
@@ -310,6 +333,10 @@ async function generate() {
       localStorage.setItem('sb_board', document.getElementById('board').innerHTML);
       localStorage.setItem('sb_imgs', JSON.stringify(imgs.filter(Boolean)));
     } catch (e) {}
+  }
+
+  if (failed.length) {
+    showErr('Some scenes failed. Scroll to the failed cards and read the on-screen error message.');
   }
 
   btn.disabled = false;
