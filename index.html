@@ -2,128 +2,307 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Storyboard Generator</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
-  :root { --bg: #0a0a0f; --surface: #13131a; --border: #1e1e2e; --accent: #7c5cfc; --text: #e8e8f0; }
-  body { background: var(--bg); color: var(--text); font-family: sans-serif; padding: 20px; }
-  .card { background: var(--surface); border: 1px solid var(--border); padding: 20px; border-radius: 12px; margin-bottom: 15px; }
-  select, input, textarea { width: 100%; padding: 10px; background: #000; border: 1px solid var(--border); color: white; margin-top: 5px; border-radius: 6px; }
-  .btn { padding: 12px; cursor: pointer; border: none; border-radius: 6px; font-weight: bold; background: var(--accent); color: white; margin-top: 10px; }
-  .key-container { display: flex; gap: 5px; align-items: center; }
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg: #0a0a0f; --surface: #13131a; --border: #1e1e2e; --accent: #7c5cfc; --accent2: #fc5c7c; --text: #e8e8f0; --muted: #6b6b80; }
+  body { background: var(--bg); color: var(--text); font-family: 'Space Grotesk', sans-serif; min-height: 100vh; }
+  header { padding: 24px 20px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+  .logo { font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); background: rgba(124,92,252,0.12); padding: 4px 10px; border-radius: 4px; }
+  header h1 { font-size: 18px; font-weight: 600; }
+  .container { padding: 20px; max-width: 700px; margin: 0 auto; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  input[type="text"], textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Space Grotesk', sans-serif; font-size: 14px; padding: 12px 14px; outline: none; transition: border-color 0.2s; resize: vertical; }
+  input[type="text"]:focus, textarea:focus { border-color: var(--accent); }
+  input[type="text"] { font-family: 'Space Mono', monospace; font-size: 13px; }
+  textarea { min-height: 160px; line-height: 1.6; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+  .hint code { font-family: 'Space Mono', monospace; background: var(--border); padding: 1px 5px; border-radius: 3px; font-size: 11px; color: var(--accent); }
+  .saved-badge { display: none; color: #5cfca0; font-size: 10px; letter-spacing: 0.1em; margin-left: 6px; }
+  .btn { display: block; width: 100%; padding: 14px; border: none; border-radius: 10px; font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; letter-spacing: 0.04em; margin-bottom: 12px; transition: transform 0.1s, opacity 0.2s; }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary { background: linear-gradient(135deg, #7c5cfc, #fc5c7c); color: #fff; }
+  .btn-download { background: linear-gradient(135deg, #1a8a5a, #5cfca0); color: #0a0a0f; display: none; }
+  .btn-download.show { display: block; }
+  #status { display: none; font-size: 13px; color: var(--muted); text-align: center; padding: 10px 0; font-family: 'Space Mono', monospace; }
+  .progress-bar { height: 2px; background: var(--border); border-radius: 2px; margin: 4px 0 16px; overflow: hidden; display: none; }
+  .progress-bar.show { display: block; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #7c5cfc, #fc5c7c); width: 0%; transition: width 0.3s ease; }
+  #error { background: rgba(252,92,124,0.1); border: 1px solid rgba(252,92,124,0.3); border-radius: 10px; padding: 14px 16px; font-size: 13px; color: #fc5c7c; display: none; margin-bottom: 16px; }
+  #error.show { display: block; }
+  #board { display: grid; gap: 20px; }
+  .scene { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; animation: fadeUp 0.4s ease both; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .scene-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .timestamp { font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; color: var(--accent); background: rgba(124,92,252,0.12); padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
+  .scene-title { font-size: 14px; font-weight: 600; flex: 1; }
+  .scene-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+  .scene-placeholder { width: 100%; aspect-ratio: 16/9; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+  .spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .ph-status { font-size: 11px; color: var(--muted); font-family: 'Space Mono', monospace; }
+  .scene-caption { padding: 12px 16px; font-size: 12px; color: var(--muted); line-height: 1.5; font-style: italic; }
 </style>
 </head>
 <body>
 
-<div class="container" style="max-width: 700px; margin: 0 auto;">
-  <h2>Storyboard Generator</h2>
-  
+<header>
+  <span class="logo">SB</span>
+  <h1>Storyboard Generator</h1>
+</header>
+
+<div class="container">
+
   <div class="card">
-    <label>OpenRouter API Key</label>
-    <div class="key-container">
-      <input type="password" id="apiKey" placeholder="sk-or-..." />
-      <button class="btn" onclick="toggleVisibility()" style="background:#333; padding: 12px 15px;">👁</button>
-    </div>
-    <button class="btn" onclick="clearKey()" style="background:#444">Clear Key</button>
-    <div id="valStatus" style="margin-top: 10px; font-size: 14px;"></div>
+    <label>OpenRouter API Key <span class="saved-badge" id="savedBadge">✓ SAVED</span></label>
+    <input type="text" id="apiKey" placeholder="sk-or-..." autocomplete="off" oninput="saveKey()" />
+    <p class="hint">Free at <strong>openrouter.ai</strong> — Sign up → Keys → Create Key. No payment needed to start.</p>
   </div>
 
   <div class="card">
-    <label>Aspect Ratio</label>
-    <select id="aspectRatio">
-      <option value="1280x720">16:9 (Cinematic)</option>
-      <option value="720x1280">9:16 (Portrait)</option>
-      <option value="1024x1024">1:1 (Square)</option>
-    </select>
+    <label>Visual Style (optional)</label>
+    <input type="text" id="style" value="cinematic 16:9, photorealistic, dramatic lighting, 8k, film grain, shallow depth of field" />
+    <p class="hint">Added to every image for consistency. Describe your character or visual theme here.</p>
   </div>
 
   <div class="card">
     <label>Timestamped Script</label>
-    <textarea id="script" placeholder="0:00 - Scene description"></textarea>
-    <button class="btn" id="generateBtn" onclick="startGeneration()">Generate Sequence</button>
+    <textarea id="script" placeholder="0:00 - Dark city skyline at night&#10;0:15 - A lone figure under a flickering streetlight&#10;0:30 - Close-up of hands holding a photograph&#10;1:00 - The figure looks up, city lights in their eyes"></textarea>
+    <p class="hint">Format: <code>0:00 - Your scene description</code> — one line per scene.</p>
   </div>
 
+  <div id="error"></div>
+  <button class="btn btn-primary" id="generateBtn" onclick="generate()">Generate Storyboard</button>
+  <button class="btn btn-download" id="downloadBtn" onclick="downloadAll()">Download All as ZIP</button>
   <div id="status"></div>
+  <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
   <div id="board"></div>
+
 </div>
 
 <script>
-function toggleVisibility() {
-  const x = document.getElementById("apiKey");
-  x.type = (x.type === "password") ? "text" : "password";
+const imgs = [];
+
+function saveKey() {
+  const k = document.getElementById('apiKey').value.trim();
+  if (k) { localStorage.setItem('or_key', k); document.getElementById('savedBadge').style.display = 'inline'; }
 }
 
-function clearKey() { 
-  localStorage.removeItem('or_key'); 
-  document.getElementById('apiKey').value = ''; 
-  document.getElementById('valStatus').textContent = '';
-}
+window.onload = function() {
+  const k = localStorage.getItem('or_key');
+  if (k) { document.getElementById('apiKey').value = k; document.getElementById('savedBadge').style.display = 'inline'; }
 
-async function validateKey(key) {
-  const status = document.getElementById('valStatus');
-  status.textContent = 'Validating...';
-  try {
-    const res = await fetch('https://openrouter.ai/api/v1/key', {
-      headers: { 'Authorization': 'Bearer ' + key }
-    });
-    if (res.status === 200) {
-      status.style.color = '#5cfca0';
-      status.textContent = 'Correct';
-      return true;
-    }
-    throw new Error();
-  } catch(e) {
-    status.style.color = '#fc5c7c';
-    status.textContent = 'Error: Invalid Key';
-    return false;
+  // Restore last session board
+  const savedBoard = localStorage.getItem('sb_board');
+  const savedImgs = localStorage.getItem('sb_imgs');
+  if (savedBoard) {
+    document.getElementById('board').innerHTML = savedBoard;
+    document.getElementById('downloadBtn').classList.add('show');
+    setStatus('Last session restored. Generate again to refresh.');
+    document.getElementById('status').style.display = 'block';
   }
-}
-
-async function startGeneration() {
-  const key = document.getElementById('apiKey').value.trim();
-  if (!key) return alert('Enter API Key');
-  
-  if (!(await validateKey(key))) return;
-
-  const scriptLines = document.getElementById('script').value.trim().split('\n');
-  const [w, h] = document.getElementById('aspectRatio').value.split('x');
-  const board = document.getElementById('board');
-  board.innerHTML = '';
-  
-  for (const line of scriptLines) {
-    if(!line.trim()) continue;
-    const [ts, ...descParts] = line.split('-');
-    const desc = descParts.join('-');
-    const el = document.createElement('div');
-    el.innerHTML = `<h3>${ts}</h3><p>Generating...</p>`;
-    board.appendChild(el);
-    
+  if (savedImgs) {
     try {
-      const promptRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: { 
-            'Authorization': 'Bearer ' + key, 
-            'Content-Type': 'application/json',
-            'X-Title': 'Storyboard Generator'
-        },
-        body: JSON.stringify({ 
-            // Fallback list: tries primary first, then falls back automatically
-            models: [
-                'anthropic/claude-3.5-sonnet',
-                'openai/gpt-4o',
-                'google/gemini-flash-1.5'
-            ],
-            messages: [{ role: 'user', content: 'Describe this for image generation: ' + desc }] 
-        })
-      });
-      const data = await promptRes.json();
-      const prompt = data.choices[0].message.content;
-      const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${w}&height=${h}&seed=${Math.random()}`;
-      el.innerHTML = `<h3>${ts}</h3><img src="${imgUrl}" width="100%">`;
-    } catch(e) {
-      el.innerHTML = `<h3>${ts}</h3><p style="color:red">Generation Failed</p>`;
-    }
+      const parsed = JSON.parse(savedImgs);
+      parsed.forEach(item => { if (item && item.ts) imgs.push(item); });
+    } catch(e) {}
   }
+};
+
+function parseScript(txt) {
+  return txt.trim().split('\n').filter(l => l.trim()).map(l => {
+    const m = l.match(/^(\d+:\d+(?::\d+)?)\s*[-\u2013\u2014]\s*(.+)$/);
+    return m ? { ts: m[1], desc: m[2].trim() } : null;
+  }).filter(Boolean);
+}
+
+function tsToFile(ts) { return ts.replace(/:/g, '_') + '.jpg'; }
+function showErr(msg) { const e = document.getElementById('error'); e.textContent = msg; e.classList.add('show'); }
+function hideErr() { document.getElementById('error').classList.remove('show'); }
+function setProgress(d, t) { document.getElementById('progressFill').style.width = (t ? Math.round(d/t*100) : 0) + '%'; }
+function setStatus(msg) { const s = document.getElementById('status'); s.style.display = 'block'; s.textContent = msg; }
+
+// Step 1: Use OpenRouter to write a cinematic prompt
+async function getCinematicPrompt(key, desc, style) {
+  const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + key,
+      'HTTP-Referer': 'https://micolegacy.github.io',
+      'X-Title': 'Storyboard Generator'
+    },
+    body: JSON.stringify({
+      model: 'openrouter/auto',
+      max_tokens: 120,
+      messages: [{ role: 'user', content: 'Write a concise image generation prompt (max 40 words) for this scene. Style: ' + style + '. Output only the prompt text, nothing else.\n\nScene: ' + desc }]
+    })
+  });
+  if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || 'Prompt API error'); }
+  const d = await r.json();
+  const text = d.choices?.[0]?.message?.content;
+  if (!text) throw new Error('Empty response from AI');
+  return text.trim();
+}
+
+// Step 2: Use Pollinations to generate the image from the prompt
+function buildImgUrl(prompt, seed) {
+  seed = seed || Math.floor(Math.random() * 999999);
+  return 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) +
+    '?model=flux&width=1280&height=720&nologo=true&seed=' + seed;
+}
+
+// Load a single image, returns img element or throws
+function loadImage(url, scene) {
+  return new Promise((resolve, reject) => {
+    const img = document.createElement('img');
+    img.className = 'scene-img';
+    img.alt = scene.desc;
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('Image load failed'));
+    img.src = url;
+  });
+}
+
+// Retry with a fresh seed each attempt
+async function loadImageWithRetry(prompt, scene, i, attempt) {
+  attempt = attempt || 1;
+  const maxAttempts = 5;
+  const seed = Math.floor(Math.random() * 999999);
+  const url = buildImgUrl(prompt, seed);
+  try {
+    const img = await loadImage(url, scene);
+    return { img, url };
+  } catch(e) {
+    const phStatus = document.getElementById('ph-status-' + i);
+    if (attempt < maxAttempts) {
+      if (phStatus) phStatus.textContent = 'Retry ' + attempt + '/' + maxAttempts + '...';
+      await new Promise(r => setTimeout(r, 2000 * attempt));
+      return loadImageWithRetry(prompt, scene, i, attempt + 1);
+    }
+    return null;
+  }
+}
+
+async function processScene(key, scene, i, style) {
+  const phStatus = document.getElementById('ph-status-' + i);
+  const cap = document.getElementById('cap-' + i);
+
+  try {
+    // Get cinematic prompt from OpenRouter
+    if (phStatus) phStatus.textContent = 'Writing prompt...';
+    const prompt = await getCinematicPrompt(key, scene.desc, style);
+    if (cap) cap.textContent = prompt;
+
+    // Generate image via Pollinations
+    if (phStatus) phStatus.textContent = 'Generating image...';
+    const result = await loadImageWithRetry(prompt, scene, i, 1);
+
+    if (result) {
+      const ph = document.getElementById('ph-' + i);
+      if (ph) ph.replaceWith(result.img);
+      imgs[i] = { url: result.url, ts: scene.ts };
+    } else {
+      throw new Error('Image failed after 5 attempts');
+    }
+
+  } catch(err) {
+    const ph = document.getElementById('ph-' + i);
+    if (ph) ph.innerHTML = '<span style="color:#fc5c7c;font-size:12px;padding:20px;display:block;text-align:center">Failed: ' + err.message + '</span>';
+    if (cap) cap.textContent = 'Could not generate.';
+  }
+}
+
+async function generate() {
+  hideErr();
+  imgs.length = 0;
+  document.getElementById('downloadBtn').classList.remove('show');
+
+  const key = document.getElementById('apiKey').value.trim();
+  const txt = document.getElementById('script').value.trim();
+  const style = document.getElementById('style').value.trim() || 'cinematic, photorealistic, dramatic lighting';
+
+  if (!key) { showErr('Please enter your OpenRouter API key.'); return; }
+  if (!txt) { showErr('Please enter your script.'); return; }
+
+  const scenes = parseScript(txt);
+  if (!scenes.length) { showErr('No valid lines found. Format: 0:00 - Your scene description'); return; }
+
+  const btn = document.getElementById('generateBtn');
+  const bar = document.getElementById('progressBar');
+  const board = document.getElementById('board');
+
+  btn.disabled = true;
+  bar.classList.add('show');
+  board.innerHTML = '';
+  setProgress(0, scenes.length);
+  setStatus('Starting ' + scenes.length + ' scenes...');
+
+  scenes.forEach((s, i) => {
+    board.innerHTML += `
+      <div class="scene" id="scene-${i}">
+        <div class="scene-header">
+          <span class="timestamp">${s.ts}</span>
+          <span class="scene-title">${s.desc}</span>
+        </div>
+        <div class="scene-placeholder" id="ph-${i}">
+          <div class="spinner"></div>
+          <span class="ph-status" id="ph-status-${i}">Waiting...</span>
+        </div>
+        <div class="scene-caption" id="cap-${i}">Generating prompt...</div>
+      </div>`;
+  });
+
+  let completed = 0;
+  await Promise.allSettled(scenes.map(async (s, i) => {
+    await processScene(key, s, i, style);
+    completed++;
+    setProgress(completed, scenes.length);
+    setStatus(completed + ' of ' + scenes.length + ' scenes done...');
+  }));
+
+  const successful = imgs.filter(Boolean).length;
+  if (successful === 0) {
+    setStatus('All scenes failed. Check your API key and try again.');
+  } else {
+    setStatus('Done — ' + successful + ' of ' + scenes.length + ' scenes generated');
+    document.getElementById('downloadBtn').classList.add('show');
+    // Save board HTML and img data to localStorage
+    try {
+      localStorage.setItem('sb_board', document.getElementById('board').innerHTML);
+      localStorage.setItem('sb_imgs', JSON.stringify(imgs.filter(Boolean)));
+    } catch(e) {}
+  }
+
+  btn.disabled = false;
+  bar.classList.remove('show');
+}
+
+async function downloadAll() {
+  const btn = document.getElementById('downloadBtn');
+  btn.disabled = true;
+  btn.textContent = 'Preparing ZIP...';
+  const zip = new JSZip();
+  const folder = zip.folder('storyboard');
+  for (let i = 0; i < imgs.length; i++) {
+    if (!imgs[i]?.url) continue;
+    try {
+      const blob = await fetch(imgs[i].url).then(r => r.blob());
+      folder.file(tsToFile(imgs[i].ts), blob);
+    } catch(e) {}
+  }
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'storyboard.zip';
+  a.click();
+  btn.disabled = false;
+  btn.textContent = 'Download All as ZIP';
 }
 </script>
 </body>
